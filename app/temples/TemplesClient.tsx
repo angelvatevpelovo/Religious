@@ -28,36 +28,18 @@ type Temple = {
   created_at: string | null;
 };
 
-const RELIGION_FILTERS = [
-  "All",
-  "Christianity",
-  "Islam",
-  "Judaism",
-  "Buddhism",
-  "Hinduism",
-  "Sikhism",
-  "Bahai Faith",
-  "Shinto",
-  "Zoroastrianism",
-  "Cao Dai",
-];
-
 function matchesSearch(temple: Temple, query: string) {
-  const searchText = [
-    temple.name,
-    temple.religion,
-    temple.country,
-    temple.city,
-  ]
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase();
+  const searchText = (temple.name ?? "").toLowerCase();
 
   return searchText.includes(query.toLowerCase());
 }
 
 function hasCoordinates(temple: Temple) {
   return temple.latitude !== null && temple.longitude !== null;
+}
+
+function isNonEmptyString(value: string | null): value is string {
+  return Boolean(value);
 }
 
 function TempleImage({ temple }: { temple: Temple }) {
@@ -87,6 +69,7 @@ export default function TemplesClient() {
   const [temples, setTemples] = useState<Temple[]>([]);
   const [query, setQuery] = useState("");
   const [selectedReligion, setSelectedReligion] = useState("All");
+  const [selectedCountry, setSelectedCountry] = useState("All");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -128,11 +111,41 @@ export default function TemplesClient() {
       const matchesReligion =
         selectedReligion === "All" || temple.religion === selectedReligion;
 
+      const matchesCountry =
+        selectedCountry === "All" || temple.country === selectedCountry;
+
       const matchesQuery = !cleanQuery || matchesSearch(temple, cleanQuery);
 
-      return matchesReligion && matchesQuery;
+      return matchesReligion && matchesCountry && matchesQuery;
     });
-  }, [query, selectedReligion, temples]);
+  }, [query, selectedCountry, selectedReligion, temples]);
+
+  const religionOptions = useMemo(
+    () =>
+      Array.from(
+        new Set(temples.map((temple) => temple.religion).filter(isNonEmptyString))
+      ).sort((first, second) => first.localeCompare(second)),
+    [temples]
+  );
+
+  const countryOptions = useMemo(
+    () =>
+      Array.from(
+        new Set(temples.map((temple) => temple.country).filter(isNonEmptyString))
+      ).sort((first, second) => first.localeCompare(second)),
+    [temples]
+  );
+
+  const hasActiveFilters =
+    query.trim() !== "" ||
+    selectedReligion !== "All" ||
+    selectedCountry !== "All";
+
+  function clearFilters() {
+    setQuery("");
+    setSelectedReligion("All");
+    setSelectedCountry("All");
+  }
 
   return (
     <PageShell>
@@ -145,40 +158,78 @@ export default function TemplesClient() {
         description="Find churches, mosques, synagogues, temples and other sacred places around the world."
       />
 
-      <label htmlFor="temple-search" className="sr-only">
-        Search temples
-      </label>
-      <input
-        id="temple-search"
-        value={query}
-        onChange={(event) => setQuery(event.target.value)}
-        placeholder="Search by name, religion, country or city..."
-        className="mt-8 w-full rounded-[1.5rem] border border-[#D4AF37]/40 bg-white/[0.06] px-5 py-4 text-lg text-[#F8FAFC] outline-none backdrop-blur transition placeholder:text-[#CBD5E1]/60 focus:border-[#D4AF37] focus:bg-white/[0.09]"
-      />
+      <GlassCard className="mt-8 p-5">
+        <div className="grid gap-4 lg:grid-cols-[1.4fr_0.8fr_0.8fr_auto] lg:items-end">
+          <label
+            htmlFor="temple-search"
+            className="grid gap-2 text-sm font-bold text-[#F5D76E]"
+          >
+            Search by name
+            <input
+              id="temple-search"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Search temple name..."
+              className="w-full rounded-[1.5rem] border border-[#D4AF37]/40 bg-white/[0.06] px-5 py-4 text-base text-[#F8FAFC] outline-none backdrop-blur transition placeholder:text-[#CBD5E1]/60 focus:border-[#D4AF37] focus:bg-white/[0.09]"
+            />
+          </label>
 
-      <div
-        className="mt-5 flex gap-3 overflow-x-auto pb-2"
-        aria-label="Filter temples by religion"
-      >
-        {RELIGION_FILTERS.map((religion) => {
-          const isActive = selectedReligion === religion;
-
-          return (
-            <button
-              key={religion}
-              type="button"
-              onClick={() => setSelectedReligion(religion)}
-              className={`shrink-0 rounded-full border px-4 py-2 text-sm font-bold transition ${
-                isActive
-                  ? "border-[#D4AF37] bg-[#D4AF37] text-[#071A2F]"
-                  : "border-white/12 bg-white/[0.06] text-[#CBD5E1] hover:border-[#D4AF37]/60 hover:text-[#F5D76E]"
-              }`}
+          <label
+            htmlFor="religion-filter"
+            className="grid gap-2 text-sm font-bold text-[#F5D76E]"
+          >
+            Religion
+            <select
+              id="religion-filter"
+              value={selectedReligion}
+              onChange={(event) => setSelectedReligion(event.target.value)}
+              className="w-full rounded-[1.5rem] border border-white/12 bg-[#0F2744] px-5 py-4 text-base text-[#F8FAFC] outline-none transition focus:border-[#D4AF37]"
             >
-              {religion}
-            </button>
-          );
-        })}
-      </div>
+              <option value="All">All religions</option>
+              {religionOptions.map((religion) => (
+                <option key={religion} value={religion}>
+                  {religion}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label
+            htmlFor="country-filter"
+            className="grid gap-2 text-sm font-bold text-[#F5D76E]"
+          >
+            Country
+            <select
+              id="country-filter"
+              value={selectedCountry}
+              onChange={(event) => setSelectedCountry(event.target.value)}
+              className="w-full rounded-[1.5rem] border border-white/12 bg-[#0F2744] px-5 py-4 text-base text-[#F8FAFC] outline-none transition focus:border-[#D4AF37]"
+            >
+              <option value="All">All countries</option>
+              {countryOptions.map((country) => (
+                <option key={country} value={country}>
+                  {country}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <button
+            type="button"
+            onClick={clearFilters}
+            disabled={!hasActiveFilters}
+            className="rounded-[1.5rem] border border-white/12 bg-white/[0.06] px-5 py-4 text-sm font-bold text-[#F5D76E] transition hover:border-[#D4AF37]/60 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-45"
+          >
+            Clear filters
+          </button>
+        </div>
+
+        <p className="mt-4 text-sm font-semibold text-[#CBD5E1]">
+          Showing{" "}
+          <span className="text-[#F5D76E]">{filteredTemples.length}</span> of{" "}
+          <span className="text-[#F5D76E]">{temples.length}</span> temples
+        </p>
+      </GlassCard>
 
       <section className="mt-8" aria-live="polite">
         {loading && (

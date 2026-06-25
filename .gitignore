@@ -27,6 +27,9 @@ supabase/.env
 supabase/.temp/
 supabase/.branches/
 
+# PowerShell local cache
+Microsoft/Windows/PowerShell/ModuleAnalysisCache
+
 # Logs
 npm-debug.log*
 yarn-debug.log*
