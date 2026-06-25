@@ -1,18 +1,61 @@
-import { BackLink, GlassCard, PageShell } from "../../../components/DesignSystem";
-import { supabase } from "../../../lib/supabase";
-
-import ReviewForm from "./ReviewForm";
-import ReviewsList from "./ReviewsList";
-
+import Image from "next/image";
+import {
+  BackLink,
+  GlassCard,
+  GoldButton,
+  PageShell,
+  SectionHeader,
+} from "../../../components/DesignSystem";
 import TemplePhotoGallery from "../../../components/TemplePhotoGallery";
 import TemplePhotoUpload from "../../../components/TemplePhotoUpload";
+import { supabase } from "../../../lib/supabase";
+import ReviewForm from "./ReviewForm";
+import ReviewsList from "./ReviewsList";
+import TempleDetailMapWrapper from "./TempleDetailMapWrapper";
 
-function hasCoordinates(temple: {
-  latitude?: number | string | null;
-  longitude?: number | string | null;
+type Temple = {
+  id: string;
+  name: string | null;
+  religion: string | null;
+  denomination: string | null;
+  country: string | null;
+  city: string | null;
+  address: string | null;
+  latitude: number | string | null;
+  longitude: number | string | null;
+  description: string | null;
+  image_url: string | null;
+  website_url: string | null;
+};
+
+function getCoordinates(temple: Temple): [number, number] | null {
+  const latitude = Number(temple.latitude);
+  const longitude = Number(temple.longitude);
+
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+    return null;
+  }
+
+  return [latitude, longitude];
+}
+
+function DetailItem({
+  label,
+  value,
+}: {
+  label: string;
+  value: string | number | null | undefined;
 }) {
-  return temple.latitude !== null && temple.latitude !== undefined &&
-    temple.longitude !== null && temple.longitude !== undefined;
+  return (
+    <div className="rounded-2xl border border-white/12 bg-black/20 p-5">
+      <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#F5D76E]">
+        {label}
+      </p>
+      <p className="mt-3 text-base leading-7 text-[#F8FAFC]">
+        {value || "Not available"}
+      </p>
+    </div>
+  );
 }
 
 export default async function TempleDetailsPage({
@@ -22,22 +65,45 @@ export default async function TempleDetailsPage({
 }) {
   const { id } = await params;
 
-  const { data: temple } = await supabase
+  const { data: temple, error } = await supabase
     .from("temples")
-    .select("*")
+    .select(
+      "id, name, religion, denomination, country, city, address, latitude, longitude, description, image_url, website_url"
+    )
     .eq("id", id)
-    .single();
+    .maybeSingle<Temple>();
+
+  if (error) {
+    return (
+      <PageShell>
+        <BackLink href="/temples">Back to Temples</BackLink>
+
+        <GlassCard className="mt-10 p-8">
+          <h1 className="text-4xl font-bold text-[#D4AF37]">
+            Could not load temple
+          </h1>
+          <p className="mt-4 text-[#CBD5E1]">
+            There was a problem loading this sacred place. Please try again
+            later.
+          </p>
+        </GlassCard>
+      </PageShell>
+    );
+  }
 
   if (!temple) {
     return (
       <PageShell>
-        <BackLink href="/temples">
-          ← Back to Temple Map
-        </BackLink>
+        <BackLink href="/temples">Back to Temples</BackLink>
 
-        <h1 className="mt-10 text-5xl font-bold text-[#D4AF37]">
-          Temple not found
-        </h1>
+        <GlassCard className="mt-10 p-8">
+          <h1 className="text-4xl font-bold text-[#D4AF37]">
+            Temple not found
+          </h1>
+          <p className="mt-4 text-[#CBD5E1]">
+            This sacred place may have been removed or the link may be invalid.
+          </p>
+        </GlassCard>
       </PageShell>
     );
   }
@@ -48,125 +114,121 @@ export default async function TempleDetailsPage({
     .eq("temple_id", temple.id)
     .order("created_at", { ascending: false });
 
-  const googleMapsUrl =
-    hasCoordinates(temple)
-      ? `https://www.google.com/maps/search/?api=1&query=${temple.latitude},${temple.longitude}`
-      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-        `${temple.name} ${temple.city} ${temple.country}`
-      )}`;
-  const googleMapsEmbedUrl = hasCoordinates(temple)
-    ? `https://www.google.com/maps?q=${temple.latitude},${temple.longitude}&output=embed`
+  const coordinates = getCoordinates(temple);
+  const googleMapsUrl = coordinates
+    ? `https://www.google.com/maps/dir/?api=1&destination=${coordinates[0]},${coordinates[1]}`
     : null;
-  const websiteUrl = temple.website_url || temple.website;
   const typeLabel =
     [temple.religion, temple.denomination].filter(Boolean).join(" - ") ||
-    temple.type ||
-    "Religious Place";
+    "Sacred Place";
+  const locationLabel =
+    [temple.city, temple.country].filter(Boolean).join(", ") ||
+    "Location not available";
 
   return (
     <PageShell>
-      <BackLink href="/temples">
-        ← Back to Temple Map
-      </BackLink>
+      <BackLink href="/temples">Back to Temples</BackLink>
 
-      <GlassCard className="mt-10 p-6 sm:p-8">
-        {temple.image_url && (
-          <div
-            className="mb-8 h-72 rounded-2xl border border-white/15 bg-cover bg-center sm:h-96"
-            style={{ backgroundImage: `url(${temple.image_url})` }}
-            aria-label={`Image of ${temple.name}`}
-          />
-        )}
+      <section className="mt-8 grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
+        <GlassCard className="overflow-hidden">
+          {temple.image_url ? (
+            <div className="relative h-72 w-full sm:h-96 lg:h-[30rem]">
+              <Image
+                src={temple.image_url}
+                alt={temple.name ? `Image of ${temple.name}` : "Temple image"}
+                fill
+                unoptimized
+                sizes="(min-width: 1024px) 60vw, 100vw"
+                className="object-cover"
+              />
+            </div>
+          ) : (
+            <div className="flex h-72 w-full items-center justify-center bg-[#0F2744] sm:h-96 lg:h-[30rem]">
+              <span className="rounded-full border border-[#D4AF37]/40 bg-[#D4AF37]/10 px-5 py-2 text-sm font-bold uppercase tracking-[0.2em] text-[#F5D76E]">
+                Sacred Place
+              </span>
+            </div>
+          )}
 
-        <h1 className="text-5xl font-bold text-[#D4AF37]">
-          {temple.name}
-        </h1>
+          <div className="p-6 sm:p-8">
+            <SectionHeader
+              eyebrow={typeLabel}
+              title={temple.name || "Unnamed temple"}
+              description={temple.description || "No description available yet."}
+            />
 
-        <p className="mt-3 text-xl text-white/80">
-          {temple.description}
-        </p>
+            <div className="mt-7 flex flex-wrap gap-3">
+              {googleMapsUrl && (
+                <GoldButton href={googleMapsUrl}>
+                  Navigate with Google Maps
+                </GoldButton>
+              )}
 
-        <div className="mt-8 grid gap-5 md:grid-cols-2">
-          <div className="rounded-2xl border border-white/20 bg-black/20 p-5">
-            <h2 className="text-2xl font-bold text-[#D4AF37]">
-              Address
-            </h2>
-
-            <p className="mt-3 text-white/80">
-              {temple.address}
-              <br />
-              {temple.city}, {temple.country}
-            </p>
-          </div>
-
-          <div className="rounded-2xl border border-white/20 bg-black/20 p-5">
-            <h2 className="text-2xl font-bold text-[#D4AF37]">
-              Coordinates
-            </h2>
-
-            <p className="mt-3 text-white/80">
-              Latitude: {temple.latitude ?? "N/A"}
-              <br />
-              Longitude: {temple.longitude ?? "N/A"}
-            </p>
-          </div>
-
-          <div className="rounded-2xl border border-white/20 bg-black/20 p-5">
-            <h2 className="text-2xl font-bold text-[#D4AF37]">
-              Contact
-            </h2>
-
-            <p className="mt-3 text-white/80">
-              Phone: {temple.phone || "Not available"}
-              <br />
-              Website:{" "}
-              {websiteUrl ? (
+              {temple.website_url && (
                 <a
-                  href={websiteUrl}
+                  href={temple.website_url}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-[#D4AF37] hover:underline"
+                  className="inline-flex items-center justify-center rounded-2xl border border-[#D4AF37]/45 bg-white/[0.06] px-5 py-3 text-sm font-bold text-[#F5D76E] transition hover:bg-white/10"
                 >
                   Visit Website
                 </a>
-              ) : (
-                "Not available"
               )}
-            </p>
+            </div>
           </div>
+        </GlassCard>
 
-          <div className="rounded-2xl border border-white/20 bg-black/20 p-5">
+        <div className="space-y-5">
+          <GlassCard className="p-6">
             <h2 className="text-2xl font-bold text-[#D4AF37]">
-              Type
+              Temple Details
             </h2>
 
-            <p className="mt-3 text-white/80">
-              {typeLabel}
-            </p>
-          </div>
+            <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
+              <DetailItem label="Religion" value={temple.religion} />
+              <DetailItem label="Denomination" value={temple.denomination} />
+              <DetailItem label="Country" value={temple.country} />
+              <DetailItem label="City" value={temple.city} />
+              <DetailItem
+                label="Address"
+                value={temple.address || locationLabel}
+              />
+              <DetailItem
+                label="Coordinates"
+                value={
+                  coordinates
+                    ? `${coordinates[0].toFixed(6)}, ${coordinates[1].toFixed(6)}`
+                    : null
+                }
+              />
+            </div>
+          </GlassCard>
+
+          {!coordinates && (
+            <GlassCard className="p-6">
+              <h2 className="text-2xl font-bold text-[#D4AF37]">
+                Map unavailable
+              </h2>
+              <p className="mt-3 text-[#CBD5E1]">
+                This temple does not have valid latitude and longitude yet.
+              </p>
+            </GlassCard>
+          )}
         </div>
+      </section>
 
-        <a
-          href={googleMapsUrl}
-          target="_blank"
-          rel="noreferrer"
-          className="mt-8 inline-block rounded-2xl bg-[#D4AF37] px-6 py-4 font-bold text-[#0F2744]"
-        >
-          Open in Google Maps
-        </a>
-
-        {googleMapsEmbedUrl && (
-          <div className="mt-8 overflow-hidden rounded-2xl border border-white/20">
-            <iframe
-              title={`${temple.name} map`}
-              src={googleMapsEmbedUrl}
-              className="h-80 w-full"
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-            />
-          </div>
-        )}
-      </GlassCard>
+      {coordinates && (
+        <div className="mt-8">
+          <TempleDetailMapWrapper
+            name={temple.name || "Unnamed temple"}
+            religion={temple.religion}
+            city={temple.city}
+            country={temple.country}
+            latitude={coordinates[0]}
+            longitude={coordinates[1]}
+          />
+        </div>
+      )}
 
       <section className="mt-10">
         <TemplePhotoGallery templeId={temple.id} />

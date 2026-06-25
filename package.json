@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "import:world": "node --use-system-ca scripts/import-osm-temples.js",
     "lint": "eslint"
   },
   "dependencies": {

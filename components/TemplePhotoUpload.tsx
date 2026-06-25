@@ -13,6 +13,13 @@ export default function TemplePhotoUpload({ templeId }: { templeId: string }) {
     try {
       setUploading(true);
 
+      const { data: userData } = await supabase.auth.getUser();
+
+      if (!userData.user) {
+        alert("Please login to upload a photo.");
+        return;
+      }
+
       const extension = file.name.split(".").pop()?.toLowerCase() || "jpg";
       const filePath = `${templeId}/${crypto.randomUUID()}.${extension}`;
 
@@ -37,7 +44,8 @@ export default function TemplePhotoUpload({ templeId }: { templeId: string }) {
         .insert({
           temple_id: templeId,
           image_url: data.publicUrl,
-          uploaded_by: null,
+          user_id: userData.user.id,
+          uploaded_by: userData.user.id,
         });
 
       if (insertError) {

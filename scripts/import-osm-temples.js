@@ -3,6 +3,10 @@ require("dotenv").config({ path: ".env.local" });
 const { createClient } = require("@supabase/supabase-js");
 
 const OVERPASS_URL = "https://overpass-api.de/api/interpreter";
+const WIKIDATA_ENTITY_URL = "https://www.wikidata.org/wiki/Special:EntityData";
+const COMMONS_FILE_URL = "https://commons.wikimedia.org/wiki/Special:FilePath";
+const IMPORT_PROGRESS_TABLE = "osm_import_progress";
+
 const RELIGION_TAGS = [
   "christian",
   "muslim",
@@ -27,48 +31,111 @@ const RELIGION_LABELS = {
   zoroastrian: "Zoroastrianism",
 };
 
-const DEFAULT_IMPORT_AREAS = [
-  {
-    label: "Bulgaria",
-    country: "Bulgaria",
-    bbox: [41.2, 22.3, 44.3, 28.8],
-  },
-  {
-    label: "United Kingdom",
-    country: "United Kingdom",
-    bbox: [49.9, -8.7, 60.9, 1.9],
-  },
-  {
-    label: "Turkey",
-    country: "Turkey",
-    bbox: [35.8, 25.6, 42.2, 44.9],
-  },
-  {
-    label: "Israel and Palestine",
-    country: "Israel / Palestine",
-    bbox: [29.4, 34.2, 33.4, 35.9],
-  },
-  {
-    label: "India",
-    country: "India",
-    bbox: [6.5, 68.1, 35.7, 97.4],
-  },
-  {
-    label: "Japan",
-    country: "Japan",
-    bbox: [30.0, 129.0, 46.0, 146.0],
-  },
-  {
-    label: "United States",
-    country: "United States",
-    bbox: [24.4, -125.0, 49.4, -66.9],
-  },
+const COUNTRIES = [
+  ["AF", "Afghanistan"],
+  ["AL", "Albania"],
+  ["DZ", "Algeria"],
+  ["AD", "Andorra"],
+  ["AO", "Angola"],
+  ["AR", "Argentina"],
+  ["AM", "Armenia"],
+  ["AU", "Australia"],
+  ["AT", "Austria"],
+  ["AZ", "Azerbaijan"],
+  ["BH", "Bahrain"],
+  ["BD", "Bangladesh"],
+  ["BY", "Belarus"],
+  ["BE", "Belgium"],
+  ["BA", "Bosnia and Herzegovina"],
+  ["BR", "Brazil"],
+  ["BG", "Bulgaria"],
+  ["KH", "Cambodia"],
+  ["CA", "Canada"],
+  ["CL", "Chile"],
+  ["CN", "China"],
+  ["CO", "Colombia"],
+  ["HR", "Croatia"],
+  ["CY", "Cyprus"],
+  ["CZ", "Czechia"],
+  ["DK", "Denmark"],
+  ["EG", "Egypt"],
+  ["EE", "Estonia"],
+  ["ET", "Ethiopia"],
+  ["FI", "Finland"],
+  ["FR", "France"],
+  ["GE", "Georgia"],
+  ["DE", "Germany"],
+  ["GR", "Greece"],
+  ["HU", "Hungary"],
+  ["IS", "Iceland"],
+  ["IN", "India"],
+  ["ID", "Indonesia"],
+  ["IR", "Iran"],
+  ["IQ", "Iraq"],
+  ["IE", "Ireland"],
+  ["IL", "Israel"],
+  ["IT", "Italy"],
+  ["JP", "Japan"],
+  ["JO", "Jordan"],
+  ["KZ", "Kazakhstan"],
+  ["KE", "Kenya"],
+  ["KW", "Kuwait"],
+  ["LA", "Laos"],
+  ["LV", "Latvia"],
+  ["LB", "Lebanon"],
+  ["LT", "Lithuania"],
+  ["MY", "Malaysia"],
+  ["MX", "Mexico"],
+  ["MN", "Mongolia"],
+  ["ME", "Montenegro"],
+  ["MA", "Morocco"],
+  ["MM", "Myanmar"],
+  ["NP", "Nepal"],
+  ["NL", "Netherlands"],
+  ["NZ", "New Zealand"],
+  ["NG", "Nigeria"],
+  ["MK", "North Macedonia"],
+  ["NO", "Norway"],
+  ["OM", "Oman"],
+  ["PK", "Pakistan"],
+  ["PS", "Palestine"],
+  ["PE", "Peru"],
+  ["PH", "Philippines"],
+  ["PL", "Poland"],
+  ["PT", "Portugal"],
+  ["QA", "Qatar"],
+  ["RO", "Romania"],
+  ["SA", "Saudi Arabia"],
+  ["RS", "Serbia"],
+  ["SG", "Singapore"],
+  ["SK", "Slovakia"],
+  ["SI", "Slovenia"],
+  ["ZA", "South Africa"],
+  ["KR", "South Korea"],
+  ["ES", "Spain"],
+  ["LK", "Sri Lanka"],
+  ["SE", "Sweden"],
+  ["CH", "Switzerland"],
+  ["SY", "Syria"],
+  ["TW", "Taiwan"],
+  ["TH", "Thailand"],
+  ["TR", "Turkey"],
+  ["UA", "Ukraine"],
+  ["AE", "United Arab Emirates"],
+  ["GB", "United Kingdom"],
+  ["US", "United States"],
+  ["UZ", "Uzbekistan"],
+  ["VN", "Vietnam"],
 ];
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const importLimitPerArea = Number(process.env.OSM_IMPORT_LIMIT_PER_AREA || 120);
-const requestPauseMs = Number(process.env.OSM_IMPORT_PAUSE_MS || 1500);
+const countryLimit = Number(process.env.OSM_COUNTRY_LIMIT || 5);
+const elementLimitPerCountry = Number(process.env.OSM_IMPORT_LIMIT_PER_COUNTRY || 500);
+const overpassPauseMs = Number(process.env.OSM_OVERPASS_PAUSE_MS || 6000);
+const wikidataPauseMs = Number(process.env.OSM_WIKIDATA_PAUSE_MS || 350);
+const updateExisting = process.env.OSM_UPDATE_EXISTING !== "false";
+const reimportCompleted = process.env.OSM_REIMPORT_COMPLETED === "true";
 
 if (!supabaseUrl) {
   throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL in .env.local.");
@@ -88,6 +155,8 @@ const supabase = createClient(supabaseUrl, serviceRoleKey, {
     persistSession: false,
   },
 });
+
+const wikidataCache = new Map();
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -117,7 +186,7 @@ function duplicateKey(name, latitude, longitude) {
   return `${normalizeName(name)}|${normalizedLatitude}|${normalizedLongitude}`;
 }
 
-function directImageUrl(value) {
+function safeHttpUrl(value) {
   if (!value || typeof value !== "string") return null;
 
   const trimmed = value.trim();
@@ -127,11 +196,40 @@ function directImageUrl(value) {
   return trimmed;
 }
 
+function commonsFileUrl(fileName) {
+  if (!fileName || typeof fileName !== "string") return null;
+
+  const normalized = fileName
+    .trim()
+    .replace(/^File:/i, "")
+    .replace(/^Image:/i, "");
+
+  if (!normalized || /^Category:/i.test(normalized)) return null;
+
+  return `${COMMONS_FILE_URL}/${encodeURIComponent(normalized)}?width=1200`;
+}
+
+function osmImageUrl(tags) {
+  const directImage = safeHttpUrl(tags.image);
+
+  if (directImage) return directImage;
+
+  if (tags.image && /^(File|Image):/i.test(tags.image)) {
+    return commonsFileUrl(tags.image);
+  }
+
+  if (tags.wikimedia_commons && /^(File|Image):/i.test(tags.wikimedia_commons)) {
+    return commonsFileUrl(tags.wikimedia_commons);
+  }
+
+  return null;
+}
+
 function websiteUrl(tags) {
   return (
-    directImageUrl(tags.website) ||
-    directImageUrl(tags["contact:website"]) ||
-    directImageUrl(tags.url)
+    safeHttpUrl(tags.website) ||
+    safeHttpUrl(tags["contact:website"]) ||
+    safeHttpUrl(tags.url)
   );
 }
 
@@ -143,14 +241,6 @@ function elementName(tags) {
     tags["official_name:en"] ||
     null
   );
-}
-
-function elementLatitude(element) {
-  return element.lat ?? element.center?.lat ?? null;
-}
-
-function elementLongitude(element) {
-  return element.lon ?? element.center?.lon ?? null;
 }
 
 function elementCity(tags) {
@@ -194,80 +284,159 @@ function elementDescription(element, religion, denomination, city, country) {
   return `OpenStreetMap place of worship: ${placeType}${locationText}. OSM ${element.type}/${element.id}.`;
 }
 
-function osmElementToTemple(element, area) {
+function wikidataId(tags) {
+  const rawId = tags.wikidata || tags["brand:wikidata"] || tags["subject:wikidata"];
+
+  if (!rawId || typeof rawId !== "string") return null;
+
+  const trimmed = rawId.trim();
+
+  return /^Q\d+$/i.test(trimmed) ? trimmed.toUpperCase() : null;
+}
+
+function wikidataClaimValue(entity, propertyId) {
+  const claim = entity?.claims?.[propertyId]?.[0];
+  const value = claim?.mainsnak?.datavalue?.value;
+
+  if (!value) return null;
+
+  if (typeof value === "string") return value;
+
+  return null;
+}
+
+async function fetchJsonWithRetry(url, options = {}, retries = 2) {
+  let lastError;
+
+  for (let attempt = 0; attempt <= retries; attempt += 1) {
+    try {
+      const response = await fetch(url, options);
+      const body = await response.text();
+
+      if (!response.ok) {
+        throw new Error(`${response.status}: ${body.slice(0, 300)}`);
+      }
+
+      return JSON.parse(body);
+    } catch (error) {
+      lastError = error;
+
+      if (attempt < retries) {
+        await sleep((attempt + 1) * 1500);
+      }
+    }
+  }
+
+  throw lastError;
+}
+
+async function fetchWikidataMetadata(qid) {
+  if (!qid) return {};
+
+  if (wikidataCache.has(qid)) {
+    return wikidataCache.get(qid);
+  }
+
+  await sleep(wikidataPauseMs);
+
+  try {
+    const data = await fetchJsonWithRetry(`${WIKIDATA_ENTITY_URL}/${qid}.json`, {
+      headers: {
+        "User-Agent": "RELIGIOUS temple importer (Wikidata metadata)",
+      },
+    });
+    const entity = data?.entities?.[qid];
+    const description = entity?.descriptions?.en?.value || null;
+    const officialWebsite = safeHttpUrl(wikidataClaimValue(entity, "P856"));
+    const imageFile = wikidataClaimValue(entity, "P18");
+    const imageUrl = imageFile ? commonsFileUrl(imageFile) : null;
+    const metadata = {
+      description,
+      image_url: imageUrl,
+      website_url: officialWebsite,
+    };
+
+    wikidataCache.set(qid, metadata);
+    return metadata;
+  } catch (error) {
+    console.warn(`Wikidata metadata failed for ${qid}: ${error.message || error}`);
+    const metadata = {};
+    wikidataCache.set(qid, metadata);
+    return metadata;
+  }
+}
+
+async function osmElementToTemple(element, country) {
   const tags = element.tags || {};
   const name = elementName(tags);
-  const latitude = elementLatitude(element);
-  const longitude = elementLongitude(element);
+  const latitude = element.lat ?? element.center?.lat ?? null;
+  const longitude = element.lon ?? element.center?.lon ?? null;
   const religionTag = String(tags.religion || "").toLowerCase();
   const religion = RELIGION_LABELS[religionTag] || null;
 
   if (!name || !religion || !latitude || !longitude) return null;
 
   const city = elementCity(tags);
-  const country = tags["addr:country"] || area.country || null;
+  const countryName = tags["addr:country"] || country.name;
   const denomination = tags.denomination || tags["denomination:en"] || null;
+  const wikidata = await fetchWikidataMetadata(wikidataId(tags));
+  const description =
+    tags.description ||
+    wikidata.description ||
+    elementDescription(element, religion, denomination, city, countryName);
 
   return {
     name,
     religion,
     denomination,
-    country,
+    country: countryName,
     city,
-    address: elementAddress(tags, city, country),
+    address: elementAddress(tags, city, countryName),
     latitude,
     longitude,
-    description: elementDescription(element, religion, denomination, city, country),
-    image_url: directImageUrl(tags.image),
-    website_url: websiteUrl(tags),
+    description,
+    image_url: osmImageUrl(tags) || wikidata.image_url || null,
+    website_url: websiteUrl(tags) || wikidata.website_url || null,
   };
 }
 
-function importAreas() {
-  const customBbox = process.env.OSM_IMPORT_BBOX;
+function selectedCountries() {
+  const requestedCodes = process.env.OSM_COUNTRY_CODES;
+  const countries = requestedCodes
+    ? COUNTRIES.filter(([code]) =>
+        requestedCodes
+          .split(",")
+          .map((value) => value.trim().toUpperCase())
+          .includes(code)
+      )
+    : COUNTRIES;
 
-  if (!customBbox) return DEFAULT_IMPORT_AREAS;
-
-  const bbox = customBbox.split(",").map((value) => Number(value.trim()));
-
-  if (bbox.length !== 4 || bbox.some((value) => !Number.isFinite(value))) {
-    throw new Error(
-      "Invalid OSM_IMPORT_BBOX. Use south,west,north,east for example: 41.2,22.3,44.3,28.8"
-    );
-  }
-
-  return [
-    {
-      label: "Custom bbox",
-      country: process.env.OSM_IMPORT_COUNTRY || null,
-      bbox,
-    },
-  ];
+  return countries.map(([code, name]) => ({ code, name }));
 }
 
-function buildOverpassQuery(area) {
-  const [south, west, north, east] = area.bbox;
+function buildOverpassQuery(country) {
   const religionPattern = RELIGION_TAGS.join("|");
 
   return `
-    [out:json][timeout:90];
+    [out:json][timeout:180];
+    area["ISO3166-1"="${country.code}"][admin_level=2]->.searchArea;
     (
-      node["amenity"="place_of_worship"]["religion"~"^(${religionPattern})$"](${south},${west},${north},${east});
-      way["amenity"="place_of_worship"]["religion"~"^(${religionPattern})$"](${south},${west},${north},${east});
-      relation["amenity"="place_of_worship"]["religion"~"^(${religionPattern})$"](${south},${west},${north},${east});
+      node["amenity"="place_of_worship"]["religion"~"^(${religionPattern})$"](area.searchArea);
+      way["amenity"="place_of_worship"]["religion"~"^(${religionPattern})$"](area.searchArea);
+      relation["amenity"="place_of_worship"]["religion"~"^(${religionPattern})$"](area.searchArea);
     );
-    out center tags ${importLimitPerArea};
+    out center ${elementLimitPerCountry};
   `;
 }
 
-async function fetchOverpassArea(area) {
+async function fetchOverpassCountry(country) {
   const response = await fetch(OVERPASS_URL, {
     method: "POST",
     headers: {
       "Content-Type": "text/plain",
       "User-Agent": "RELIGIOUS temple importer (OpenStreetMap Overpass)",
     },
-    body: buildOverpassQuery(area),
+    body: buildOverpassQuery(country),
   });
 
   const body = await response.text();
@@ -279,8 +448,47 @@ async function fetchOverpassArea(area) {
   return JSON.parse(body);
 }
 
-async function loadExistingDuplicateKeys() {
-  const keys = new Set();
+async function assertProgressTableExists() {
+  const { error } = await supabase
+    .from(IMPORT_PROGRESS_TABLE)
+    .select("country_code")
+    .limit(1);
+
+  if (error) {
+    throw new Error(
+      `Missing or inaccessible ${IMPORT_PROGRESS_TABLE}. Run scripts/create-osm-import-progress.sql in Supabase first. Original error: ${error.message}`
+    );
+  }
+}
+
+async function getCountryProgress(countryCode) {
+  const { data, error } = await supabase
+    .from(IMPORT_PROGRESS_TABLE)
+    .select("*")
+    .eq("country_code", countryCode)
+    .maybeSingle();
+
+  if (error) throw error;
+
+  return data;
+}
+
+async function saveCountryProgress(country, patch) {
+  const { error } = await supabase.from(IMPORT_PROGRESS_TABLE).upsert(
+    {
+      country_code: country.code,
+      country_name: country.name,
+      last_run_at: new Date().toISOString(),
+      ...patch,
+    },
+    { onConflict: "country_code" }
+  );
+
+  if (error) throw error;
+}
+
+async function loadExistingTempleIndex() {
+  const byDuplicateKey = new Map();
   const pageSize = 1000;
   let from = 0;
 
@@ -288,7 +496,9 @@ async function loadExistingDuplicateKeys() {
     const to = from + pageSize - 1;
     const { data, error } = await supabase
       .from("temples")
-      .select("name, latitude, longitude")
+      .select(
+        "id, name, religion, denomination, country, city, address, latitude, longitude, description, image_url, website_url"
+      )
       .range(from, to);
 
     if (error) throw error;
@@ -296,7 +506,7 @@ async function loadExistingDuplicateKeys() {
     for (const temple of data || []) {
       const key = duplicateKey(temple.name, temple.latitude, temple.longitude);
 
-      if (key) keys.add(key);
+      if (key) byDuplicateKey.set(key, temple);
     }
 
     if (!data || data.length < pageSize) break;
@@ -304,78 +514,239 @@ async function loadExistingDuplicateKeys() {
     from += pageSize;
   }
 
-  return keys;
+  return byDuplicateKey;
+}
+
+function missingFieldUpdates(existingTemple, importedTemple) {
+  const updates = {};
+  const fields = [
+    "religion",
+    "denomination",
+    "country",
+    "city",
+    "address",
+    "description",
+    "image_url",
+    "website_url",
+  ];
+
+  for (const field of fields) {
+    const currentValue = existingTemple[field];
+    const nextValue = importedTemple[field];
+
+    if (
+      updateExisting &&
+      (currentValue === null || currentValue === undefined || currentValue === "") &&
+      nextValue !== null &&
+      nextValue !== undefined &&
+      nextValue !== ""
+    ) {
+      updates[field] = nextValue;
+    }
+  }
+
+  return updates;
 }
 
 async function insertTemple(temple) {
-  const { error } = await supabase.from("temples").insert(temple);
+  const { data, error } = await supabase
+    .from("temples")
+    .insert(temple)
+    .select(
+      "id, name, religion, denomination, country, city, address, latitude, longitude, description, image_url, website_url"
+    )
+    .single();
 
   if (error) throw error;
+
+  return data;
 }
 
-async function main() {
-  console.log("Starting OpenStreetMap temple import...");
-  console.log(`Overpass limit per area: ${importLimitPerArea}`);
-  console.log("Duplicate check: name + latitude + longitude");
+async function updateTemple(existingTemple, updates) {
+  const { data, error } = await supabase
+    .from("temples")
+    .update(updates)
+    .eq("id", existingTemple.id)
+    .select(
+      "id, name, religion, denomination, country, city, address, latitude, longitude, description, image_url, website_url"
+    )
+    .single();
 
-  const existingKeys = await loadExistingDuplicateKeys();
-  const seenKeys = new Set(existingKeys);
-  const summary = {
+  if (error) throw error;
+
+  return data;
+}
+
+async function importCountry(country, existingIndex) {
+  const stats = {
+    fetched: 0,
+    candidates: 0,
     inserted: 0,
+    updated: 0,
     skipped: 0,
     errors: 0,
   };
 
-  for (const area of importAreas()) {
+  await saveCountryProgress(country, {
+    status: "running",
+    started_at: new Date().toISOString(),
+    completed_at: null,
+    last_error: null,
+  });
+
+  const data = await fetchOverpassCountry(country);
+  const elements = Array.isArray(data.elements) ? data.elements : [];
+  stats.fetched = elements.length;
+
+  for (const element of elements) {
     try {
-      console.log(`\nFetching ${area.label}...`);
+      const temple = await osmElementToTemple(element, country);
 
-      const data = await fetchOverpassArea(area);
-      const elements = Array.isArray(data.elements) ? data.elements : [];
-      console.log(`Fetched ${elements.length} OSM elements.`);
-
-      for (const element of elements) {
-        try {
-          const temple = osmElementToTemple(element, area);
-
-          if (!temple) {
-            summary.skipped += 1;
-            continue;
-          }
-
-          const key = duplicateKey(temple.name, temple.latitude, temple.longitude);
-
-          if (!key || seenKeys.has(key)) {
-            summary.skipped += 1;
-            continue;
-          }
-
-          await insertTemple(temple);
-          seenKeys.add(key);
-          summary.inserted += 1;
-          console.log(`Inserted: ${temple.name}`);
-        } catch (error) {
-          summary.errors += 1;
-          console.error(
-            `Error importing OSM ${element.type}/${element.id}:`,
-            error.message || error
-          );
-        }
+      if (!temple) {
+        stats.skipped += 1;
+        continue;
       }
-    } catch (error) {
-      summary.errors += 1;
-      console.error(`Failed fetching ${area.label}:`, error.message || error);
-    }
 
-    await sleep(requestPauseMs);
+      stats.candidates += 1;
+
+      const key = duplicateKey(temple.name, temple.latitude, temple.longitude);
+
+      if (!key) {
+        stats.skipped += 1;
+        continue;
+      }
+
+      const existingTemple = existingIndex.get(key);
+
+      if (existingTemple) {
+        const updates = missingFieldUpdates(existingTemple, temple);
+
+        if (Object.keys(updates).length > 0) {
+          const updatedTemple = await updateTemple(existingTemple, updates);
+          existingIndex.set(key, updatedTemple);
+          stats.updated += 1;
+        } else {
+          stats.skipped += 1;
+        }
+
+        continue;
+      }
+
+      const insertedTemple = await insertTemple(temple);
+      existingIndex.set(key, insertedTemple);
+      stats.inserted += 1;
+    } catch (error) {
+      stats.errors += 1;
+      console.error(
+        `Error importing OSM ${element.type}/${element.id} in ${country.code}:`,
+        error.message || error
+      );
+    }
   }
 
-  console.log("\nOpenStreetMap temple import finished.");
-  console.log(`Inserted: ${summary.inserted}`);
-  console.log(`Skipped: ${summary.skipped}`);
-  console.log(`Errors: ${summary.errors}`);
+  await saveCountryProgress(country, {
+    status: stats.errors > 0 ? "completed_with_errors" : "completed",
+    completed_at: new Date().toISOString(),
+    fetched: stats.fetched,
+    candidates: stats.candidates,
+    inserted: stats.inserted,
+    updated: stats.updated,
+    skipped: stats.skipped,
+    errors: stats.errors,
+  });
 
-  if (summary.errors > 0) {
+  return stats;
+}
+
+async function countriesToImport() {
+  const countries = selectedCountries();
+  const pendingCountries = [];
+
+  for (const country of countries) {
+    const progress = await getCountryProgress(country.code);
+
+    if (
+      !reimportCompleted &&
+      (progress?.status === "completed" ||
+        progress?.status === "completed_with_errors")
+    ) {
+      continue;
+    }
+
+    pendingCountries.push(country);
+
+    if (pendingCountries.length >= countryLimit) {
+      break;
+    }
+  }
+
+  return pendingCountries;
+}
+
+function printCountryStats(country, stats) {
+  console.log(`\n${country.name} (${country.code}) import stats:`);
+  console.log(`Fetched: ${stats.fetched}`);
+  console.log(`Candidates: ${stats.candidates}`);
+  console.log(`Inserted: ${stats.inserted}`);
+  console.log(`Updated: ${stats.updated}`);
+  console.log(`Skipped: ${stats.skipped}`);
+  console.log(`Errors: ${stats.errors}`);
+}
+
+async function main() {
+  console.log("Starting production OpenStreetMap temples import...");
+  console.log(`Country limit this run: ${countryLimit}`);
+  console.log(`Overpass element limit per country: ${elementLimitPerCountry}`);
+  console.log("Duplicate check: name + latitude + longitude");
+  console.log("Progress table: osm_import_progress");
+
+  await assertProgressTableExists();
+
+  const countries = await countriesToImport();
+
+  if (countries.length === 0) {
+    console.log("No pending countries found. Use OSM_REIMPORT_COMPLETED=true to run completed countries again.");
+    return;
+  }
+
+  const existingIndex = await loadExistingTempleIndex();
+  const totalStats = {
+    inserted: 0,
+    updated: 0,
+    skipped: 0,
+    errors: 0,
+  };
+
+  for (const country of countries) {
+    console.log(`\nImporting ${country.name} (${country.code})...`);
+
+    try {
+      const stats = await importCountry(country, existingIndex);
+      printCountryStats(country, stats);
+      totalStats.inserted += stats.inserted;
+      totalStats.updated += stats.updated;
+      totalStats.skipped += stats.skipped;
+      totalStats.errors += stats.errors;
+    } catch (error) {
+      totalStats.errors += 1;
+      await saveCountryProgress(country, {
+        status: "failed",
+        completed_at: null,
+        last_error: String(error.message || error).slice(0, 1000),
+      });
+      console.error(`Failed importing ${country.name}:`, error.message || error);
+    }
+
+    await sleep(overpassPauseMs);
+  }
+
+  console.log("\nWorld temple import run finished.");
+  console.log(`Inserted: ${totalStats.inserted}`);
+  console.log(`Updated: ${totalStats.updated}`);
+  console.log(`Skipped: ${totalStats.skipped}`);
+  console.log(`Errors: ${totalStats.errors}`);
+
+  if (totalStats.errors > 0) {
     process.exitCode = 1;
   }
 }
