@@ -1,0 +1,114 @@
+[
+  {
+    "religion": "Christianity",
+    "title": "Christmas Day",
+    "description": "A Christian celebration of the birth of Jesus Christ.",
+    "event_date": "2026-12-25",
+    "country": null,
+    "is_global": true
+  },
+  {
+    "religion": "Christianity",
+    "title": "Easter Sunday",
+    "description": "A Christian celebration of the resurrection of Jesus Christ.",
+    "event_date": "2027-03-28",
+    "country": null,
+    "is_global": true
+  },
+  {
+    "religion": "Islam",
+    "title": "Eid al-Fitr",
+    "description": "A Muslim celebration marking the end of Ramadan.",
+    "event_date": "2027-02-07",
+    "country": null,
+    "is_global": true
+  },
+  {
+    "religion": "Islam",
+    "title": "Eid al-Adha",
+    "description": "A Muslim festival of sacrifice observed during Hajj.",
+    "event_date": "2027-04-17",
+    "country": null,
+    "is_global": true
+  },
+  {
+    "religion": "Judaism",
+    "title": "Rosh Hashanah",
+    "description": "The Jewish New Year, a time of reflection and prayer.",
+    "event_date": "2026-09-12",
+    "country": null,
+    "is_global": true
+  },
+  {
+    "religion": "Judaism",
+    "title": "Yom Kippur",
+    "description": "The Jewish Day of Atonement, centered on repentance and fasting.",
+    "event_date": "2026-09-21",
+    "country": null,
+    "is_global": true
+  },
+  {
+    "religion": "Buddhism",
+    "title": "Vesak",
+    "description": "A Buddhist observance honoring the birth, enlightenment and passing of the Buddha.",
+    "event_date": "2027-05-20",
+    "country": null,
+    "is_global": true
+  },
+  {
+    "religion": "Buddhism",
+    "title": "Asalha Puja",
+    "description": "A Theravada Buddhist festival remembering the Buddha's first sermon.",
+    "event_date": "2027-07-19",
+    "country": null,
+    "is_global": true
+  },
+  {
+    "religion": "Hinduism",
+    "title": "Diwali",
+    "description": "A Hindu festival of lights celebrating the victory of light over darkness.",
+    "event_date": "2026-11-08",
+    "country": null,
+    "is_global": true
+  },
+  {
+    "religion": "Hinduism",
+    "title": "Holi",
+    "description": "A Hindu spring festival celebrating color, renewal and devotion.",
+    "event_date": "2027-03-22",
+    "country": "India",
+    "is_global": false
+  },
+  {
+    "religion": "Sikhism",
+    "title": "Guru Nanak Gurpurab",
+    "description": "A Sikh celebration of the birth of Guru Nanak, the first Sikh Guru.",
+    "event_date": "2026-11-24",
+    "country": null,
+    "is_global": true
+  },
+  {
+    "religion": "Sikhism",
+    "title": "Vaisakhi",
+    "description": "A Sikh festival commemorating the formation of the Khalsa.",
+    "event_date": "2027-04-14",
+    "country": null,
+    "is_global": true
+  },
+  {
+    "religion": "Bahai Faith",
+    "title": "Naw-Ruz",
+    "description": "The Bahai New Year, observed at the spring equinox.",
+    "event_date": "2027-03-20",
+    "country": null,
+    "is_global": true
+  },
+  {
+    "religion": "Bahai Faith",
+    "title": "Ridvan",
+    "description": "A Bahai festival commemorating Baha'u'llah's declaration in the Garden of Ridvan.",
+    "event_date": "2027-04-21",
+    "country": null,
+    "is_global": true
+  }
+]
