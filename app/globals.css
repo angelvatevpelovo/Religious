@@ -36,3 +36,26 @@ body {
 .leaflet-container {
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.religious-cluster {
+  align-items: center;
+  background: rgba(212, 175, 55, 0.22);
+  border: 1px solid rgba(245, 215, 110, 0.85);
+  border-radius: 999px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+  color: #071a2f;
+  display: flex;
+  font-weight: 800;
+  justify-content: center;
+}
+
+.religious-cluster span {
+  align-items: center;
+  background: #d4af37;
+  border-radius: 999px;
+  display: flex;
+  height: 34px;
+  justify-content: center;
+  min-width: 34px;
+  padding: 0 8px;
+}

@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "import:world": "node --use-system-ca scripts/import-osm-temples.js",
+    "enrich:temple-images": "node --use-system-ca scripts/enrich-temple-images.js",
     "lint": "eslint"
   },
   "dependencies": {
@@ -14,6 +15,7 @@
     "axios": "^1.11.0",
     "dotenv": "^17.2.1",
     "leaflet": "^1.9.4",
+    "leaflet.markercluster": "^1.5.3",
     "next": "16.2.9",
     "openai": "^6.45.0",
     "react": "19.2.4",
@@ -24,6 +26,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/leaflet": "^1.9.21",
+    "@types/leaflet.markercluster": "^1.5.6",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

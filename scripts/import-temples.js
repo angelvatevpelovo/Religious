@@ -26,38 +26,36 @@ const cities = [
 function buildQuery(city) {
   return `
     [out:json][timeout:60];
-
     (
       node["amenity"="place_of_worship"](around:${city.radius},${city.lat},${city.lng});
       way["amenity"="place_of_worship"](around:${city.radius},${city.lat},${city.lng});
       relation["amenity"="place_of_worship"](around:${city.radius},${city.lat},${city.lng});
     );
-
     out center tags;
   `;
-}
-
-function templeType(tags = {}) {
-  if (tags.religion) return tags.religion;
-  if (tags.denomination) return tags.denomination;
-  return "Religious place";
 }
 
 function templeName(element) {
   return (
     element.tags?.name ||
     element.tags?.["name:en"] ||
-    element.tags?.["official_name"] ||
+    element.tags?.official_name ||
     null
   );
 }
 
+function templeReligion(tags = {}) {
+  return tags.religion || "Religious place";
+}
+
+function templeType(tags = {}) {
+  return tags.religion || tags.denomination || "Religious place";
+}
+
 function templeAddress(element, cityName) {
   const tags = element.tags || {};
-
   const street = tags["addr:street"] || "";
   const number = tags["addr:housenumber"] || "";
-
   const address = `${street} ${number}`.trim();
 
   return address || cityName;
@@ -76,30 +74,73 @@ function templeCity(element, fallbackCity) {
 
 function templeCountry(element) {
   const tags = element.tags || {};
-
-  return tags["addr:country"] || null;
+  return tags["addr:country"] || "Unknown";
 }
 
 function templeDescription(element) {
   const tags = element.tags || {};
-
   const religion = tags.religion || "religious";
   const denomination = tags.denomination ? ` (${tags.denomination})` : "";
 
   return `A ${religion}${denomination} place of worship.`;
 }
 
+function templeWebsite(element) {
+  const tags = element.tags || {};
+  return tags.website || tags["contact:website"] || null;
+}
+
+function templePhone(element) {
+  const tags = element.tags || {};
+  return tags.phone || tags["contact:phone"] || null;
+}
+
+function cleanText(value) {
+  if (value === undefined || value === null) return null;
+  const cleaned = String(value).trim();
+  return cleaned.length ? cleaned : null;
+}
+
+function uniqueByPlace(rows) {
+  const seen = new Set();
+
+  return rows.filter((row) => {
+    const key = `${row.name}|${row.city}|${row.country}`.toLowerCase();
+
+    if (seen.has(key)) return false;
+
+    seen.add(key);
+    return true;
+  });
+}
+
+async function fetchOverpass(query) {
+  const params = new URLSearchParams();
+  params.append("data", query);
+
+  const { data } = await axios.post(OVERPASS_URL, params.toString(), {
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      "User-Agent": "ReligiousApp/1.0",
+    },
+    timeout: 90000,
+  });
+
+  return data;
+}
+
 async function upsertTemples(rows) {
   if (!rows.length) return;
 
-  const { error } = await supabase
-    .from("temples")
-    .upsert(rows, {
-      onConflict: "external_id",
-    });
+  const uniqueRows = uniqueByPlace(rows);
+
+  const { error } = await supabase.from("temples").upsert(uniqueRows, {
+    onConflict: "name,city,country",
+    ignoreDuplicates: true,
+  });
 
   if (error) {
-    console.error("Supabase insert error:", error);
+    console.error("Supabase insert error:", error.message);
     throw error;
   }
 }
@@ -108,24 +149,12 @@ async function importCity(city) {
   console.log(`Importing temples around ${city.name}...`);
 
   const query = buildQuery(city);
-
-  const { data } = await axios.post(
-    OVERPASS_URL,
-    query,
-    {
-      headers: {
-        "Content-Type": "text/plain",
-      },
-      timeout: 90000,
-    }
-  );
-
+  const data = await fetchOverpass(query);
   const elements = data.elements || [];
 
   const temples = elements
     .map((element) => {
-      const name = templeName(element);
-
+      const name = cleanText(templeName(element));
       if (!name) return null;
 
       const latitude = element.lat || element.center?.lat;
@@ -136,17 +165,25 @@ async function importCity(city) {
       return {
         external_id: `osm-${element.type}-${element.id}`,
         source: "OpenStreetMap",
-        religion_id: null,
+
         name,
-        type: templeType(element.tags),
-        country: templeCountry(element) || "Unknown",
-        city: templeCity(element, city.name),
-        address: templeAddress(element, city.name),
+        religion: cleanText(templeReligion(element.tags)),
+        denomination: cleanText(element.tags?.denomination),
+        type: cleanText(templeType(element.tags)),
+
+        country: cleanText(templeCountry(element)),
+        city: cleanText(templeCity(element, city.name)),
+        address: cleanText(templeAddress(element, city.name)),
+
         latitude,
         longitude,
-        phone: element.tags?.phone || null,
-        website: element.tags?.website || null,
-        description: templeDescription(element),
+
+        phone: cleanText(templePhone(element)),
+        website: cleanText(templeWebsite(element)),
+        website_url: cleanText(templeWebsite(element)),
+
+        image_url: null,
+        description: cleanText(templeDescription(element)),
       };
     })
     .filter(Boolean);
@@ -155,7 +192,7 @@ async function importCity(city) {
 
   await upsertTemples(temples);
 
-  console.log(`Imported ${temples.length} temples from ${city.name}`);
+  console.log(`Imported/skipped ${temples.length} temples from ${city.name}`);
 }
 
 async function main() {
@@ -168,12 +205,12 @@ async function main() {
       console.error(`Failed importing ${city.name}:`, error.message);
     }
 
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 5000));
   }
 
   console.log("DONE! Temple import finished.");
 }
 
 main().catch((error) => {
-  console.error("IMPORT FAILED:", error);
+  console.error("IMPORT FAILED:", error.message);
 });

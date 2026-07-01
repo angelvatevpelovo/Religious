@@ -8,3 +8,11 @@ export type TempleMapTemple = {
   longitude: number | string | null;
   image_url: string | null;
 };
+
+export type TempleListTemple = TempleMapTemple & {
+  denomination: string | null;
+  address: string | null;
+  description: string | null;
+  website_url: string | null;
+  created_at: string | null;
+};

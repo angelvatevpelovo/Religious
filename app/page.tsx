@@ -191,7 +191,7 @@ export default async function HomePage() {
           <>
             <GoldButton href="/search">{t.searchScripture}</GoldButton>
             <GoldButton
-              href="/assistant"
+              href="/ai"
               className="border border-white/12 bg-white/[0.06] text-[#F8FAFC] hover:bg-white/10"
             >
               {t.askAssistant}

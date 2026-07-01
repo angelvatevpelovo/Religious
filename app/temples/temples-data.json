@@ -1,0 +1,67 @@
+[
+  {
+    "name": "Alexander Nevsky Cathedral",
+    "religion": "Christianity",
+    "denomination": "Eastern Orthodox",
+    "country": "Bulgaria",
+    "city": "Sofia",
+    "address": "pl. Sveti Aleksandar Nevski, Sofia",
+    "latitude": 42.6958,
+    "longitude": 23.3329,
+    "description": "One of the largest Eastern Orthodox cathedrals in the world.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/9/92/Basilica_Sancti_Petri_blue_hour.jpg",
+    "website_url": ""
+  },
+  {
+    "name": "St. Peter's Basilica",
+    "religion": "Christianity",
+    "denomination": "Roman Catholic",
+    "country": "Vatican City",
+    "city": "Vatican City",
+    "address": "Piazza San Pietro",
+    "latitude": 41.9022,
+    "longitude": 12.4539,
+    "description": "A major basilica and one of the most important Christian pilgrimage sites.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/9/92/Basilica_Sancti_Petri_blue_hour.jpg",
+    "website_url": "https://www.basilicasanpietro.va/"
+  },
+  {
+    "name": "Masjid al-Haram",
+    "religion": "Islam",
+    "denomination": "Sunni Islam",
+    "country": "Saudi Arabia",
+    "city": "Mecca",
+    "address": "Al Haram, Mecca",
+    "latitude": 21.4225,
+    "longitude": 39.8262,
+    "description": "The holiest mosque in Islam, surrounding the Kaaba.",
+    "image_url": "",
+    "website_url": ""
+  },
+  {
+    "name": "Western Wall",
+    "religion": "Judaism",
+    "denomination": "Judaism",
+    "country": "Israel",
+    "city": "Jerusalem",
+    "address": "Western Wall Plaza",
+    "latitude": 31.7767,
+    "longitude": 35.2345,
+    "description": "One of the most sacred prayer sites in Judaism.",
+    "image_url": "",
+    "website_url": ""
+  },
+  {
+    "name": "Mahabodhi Temple",
+    "religion": "Buddhism",
+    "denomination": "Buddhism",
+    "country": "India",
+    "city": "Bodh Gaya",
+    "address": "Bodh Gaya, Bihar",
+    "latitude": 24.6959,
+    "longitude": 84.9914,
+    "description": "A UNESCO World Heritage Site where the Buddha is said to have attained enlightenment.",
+    "image_url": "",
+    "website_url": ""
+  }
+]

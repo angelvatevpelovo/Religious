@@ -12,7 +12,7 @@ export default function MobileBottomNav() {
     { href: "/book", label: dictionary.nav.books, short: dictionary.nav.books },
     { href: "/temples", label: dictionary.nav.temples, short: dictionary.nav.places },
     { href: "/calendar", label: dictionary.nav.calendar, short: dictionary.nav.days },
-    { href: "/assistant", label: dictionary.nav.assistant, short: dictionary.nav.ai },
+    { href: "/ai", label: dictionary.nav.assistant, short: dictionary.nav.ai },
     { href: "/reminders", label: dictionary.nav.reminders, short: dictionary.nav.remind },
     { href: "/profile", label: dictionary.nav.profile, short: dictionary.nav.profile },
     { href: "/search", label: dictionary.nav.search, short: dictionary.nav.search },

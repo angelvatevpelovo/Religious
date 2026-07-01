@@ -13,7 +13,7 @@ export default function AppHeaderClient() {
     { href: "/book", label: dictionary.nav.books },
     { href: "/temples", label: dictionary.nav.temples },
     { href: "/calendar", label: dictionary.nav.calendar },
-    { href: "/assistant", label: dictionary.nav.assistant },
+    { href: "/ai", label: dictionary.nav.assistant },
     { href: "/reminders", label: dictionary.nav.reminders },
     { href: "/profile", label: dictionary.nav.profile },
   ];
