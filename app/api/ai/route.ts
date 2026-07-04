@@ -105,6 +105,57 @@ function createPlaceholderAnswer(message: string, context: string) {
   return `### Reflective guidance\n${contextHint}\n\nFor your question: "${message}"\n\n- Take a calm moment to name what you are seeking: comfort, understanding, practice, or community.\n- If your question is about a specific tradition, consider checking a trusted sacred text, commentary, or knowledgeable spiritual leader from that tradition.\n- If this touches health, safety, law, or mental health, please speak with a qualified professional.\n\nThis assistant provides informational and reflective guidance. It is not a replacement for clergy, spiritual leaders, medical, legal, or mental health professionals.`;
 }
 
+function conversationTitle(message: string) {
+  return message.trim().slice(0, 70) || "AI Assistant question";
+}
+
+async function saveAIExchange({
+  supabase,
+  userId,
+  question,
+  answer,
+}: {
+  supabase: ReturnType<typeof getSupabaseClient>;
+  userId: string | null;
+  question: string;
+  answer: string;
+}) {
+  if (!userId || !question.trim() || !answer.trim()) return;
+
+  const { data: conversation, error: conversationError } = await supabase
+    .from("ai_conversations")
+    .insert({
+      user_id: userId,
+      title: conversationTitle(question),
+    })
+    .select("id")
+    .single();
+
+  if (conversationError) {
+    console.error("AI history conversation save error:", conversationError);
+    return;
+  }
+
+  const { error: messagesError } = await supabase.from("ai_messages").insert([
+    {
+      conversation_id: conversation.id,
+      user_id: userId,
+      role: "user",
+      content: question,
+    },
+    {
+      conversation_id: conversation.id,
+      user_id: userId,
+      role: "assistant",
+      content: answer,
+    },
+  ]);
+
+  if (messagesError) {
+    console.error("AI history messages save error:", messagesError);
+  }
+}
+
 export async function POST(request: Request) {
   try {
     if (isDevelopment()) {
@@ -148,16 +199,35 @@ export async function POST(request: Request) {
     } catch (error) {
       logOriginalError("AI provider startup error:", error);
 
-      return NextResponse.json({ answer: createPlaceholderAnswer(message, context) });
+      const placeholderAnswer = createPlaceholderAnswer(message, context);
+
+      await saveAIExchange({
+        supabase,
+        userId: user?.id ?? null,
+        question: message,
+        answer: placeholderAnswer,
+      });
+
+      return NextResponse.json({ answer: placeholderAnswer });
     }
 
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
+        let answer = "";
+
         try {
           for await (const chunk of aiStream) {
+            answer = `${answer}${chunk}`;
             controller.enqueue(encoder.encode(chunk));
           }
+
+          await saveAIExchange({
+            supabase,
+            userId: user?.id ?? null,
+            question: message,
+            answer,
+          });
 
           controller.close();
         } catch (error) {

@@ -3,6 +3,7 @@
 import type { FormEvent, ReactNode } from "react";
 import { useMemo, useState } from "react";
 import { BackLink, GlassCard } from "../../components/DesignSystem";
+import { supabase } from "../../lib/supabase";
 import type { AIChatMessage, AIChatRole } from "../../lib/ai/types";
 
 type ChatMessage = AIChatMessage & {
@@ -144,10 +145,16 @@ export default function AIClient() {
     setMessages((current) => [...current, userMessage]);
 
     try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       const response = await fetch("/api/ai", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...(session?.access_token
+            ? { Authorization: `Bearer ${session.access_token}` }
+            : {}),
         },
         body: JSON.stringify({
           message: cleanQuestion,
@@ -257,8 +264,14 @@ export default function AIClient() {
           <GlassCard className="p-5">
             <h2 className="text-xl font-bold text-[#F8FAFC]">MVP guide</h2>
             <p className="mt-3 text-sm leading-6 text-[#CBD5E1]">
-              This first version works without login. It sends your question to the server route and shows the response here.
+              This version works without login. If you are logged in, your questions and answers are saved to your private history.
             </p>
+            <a
+              href="/ai-history"
+              className="mt-4 inline-flex rounded-2xl border border-[#D4AF37]/40 bg-[#D4AF37]/10 px-4 py-3 text-sm font-bold text-[#F5D76E] transition hover:bg-[#D4AF37]/20"
+            >
+              View AI history
+            </a>
           </GlassCard>
         </aside>
       </div>
