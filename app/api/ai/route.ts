@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
+﻿import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { buildReligiousGuideContext } from "../../../lib/ai/context";
 import { getOpenAIProviderDiagnostics } from "../../../lib/ai/openai-provider";
@@ -97,6 +97,14 @@ function publicErrorMessage(error: unknown) {
   return isDevelopment() ? errorMessage(error) : GENERIC_AI_ERROR;
 }
 
+function createPlaceholderAnswer(message: string, context: string) {
+  const contextHint = context.trim()
+    ? "I found some RELIGIOUS app context that may be relevant, but the live AI provider is not available right now."
+    : "I do not have live AI provider access right now, so this is a safe placeholder response.";
+
+  return `### Reflective guidance\n${contextHint}\n\nFor your question: "${message}"\n\n- Take a calm moment to name what you are seeking: comfort, understanding, practice, or community.\n- If your question is about a specific tradition, consider checking a trusted sacred text, commentary, or knowledgeable spiritual leader from that tradition.\n- If this touches health, safety, law, or mental health, please speak with a qualified professional.\n\nThis assistant provides informational and reflective guidance. It is not a replacement for clergy, spiritual leaders, medical, legal, or mental health professionals.`;
+}
+
 export async function POST(request: Request) {
   try {
     if (isDevelopment()) {
@@ -140,10 +148,7 @@ export async function POST(request: Request) {
     } catch (error) {
       logOriginalError("AI provider startup error:", error);
 
-      return NextResponse.json(
-        { error: publicErrorMessage(error) },
-        { status: 500 }
-      );
+      return NextResponse.json({ answer: createPlaceholderAnswer(message, context) });
     }
 
     const encoder = new TextEncoder();
