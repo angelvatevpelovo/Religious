@@ -4,7 +4,16 @@ const { createClient } = require("@supabase/supabase-js");
 
 const WIKIDATA_SPARQL_URL = "https://query.wikidata.org/sparql";
 const COMMONS_FILE_URL = "https://commons.wikimedia.org/wiki/Special:FilePath";
-const IMPORT_LIMIT = Number(process.env.WIKIDATA_TEMPLE_IMPORT_LIMIT || 100);
+const IMPORT_LIMIT = Number(process.env.WIKIDATA_TEMPLE_IMPORT_LIMIT || 10);
+const PER_TYPE_LIMIT = Number(process.env.WIKIDATA_TEMPLE_IMPORT_PER_TYPE_LIMIT || 2);
+const WIKIDATA_TIMEOUT_MS = Number(process.env.WIKIDATA_TEMPLE_TIMEOUT_MS || 20000);
+const WIKIDATA_RETRIES = Number(process.env.WIKIDATA_TEMPLE_RETRIES || 2);
+const WIKIDATA_REQUEST_DELAY_MS = Number(
+  process.env.WIKIDATA_TEMPLE_REQUEST_DELAY_MS || 1200
+);
+const USER_AGENT =
+  process.env.WIKIDATA_TEMPLE_USER_AGENT ||
+  "RELIGIOUS/1.0 temple importer (limited Wikidata import; contact: local-dev)";
 
 const RELIGIOUS_PLACE_TYPES = [
   { qid: "Q16970", religion: "Christianity" },
@@ -43,6 +52,10 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
     persistSession: false,
   },
 });
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 function normalizeText(value) {
   return String(value || "")
@@ -114,59 +127,157 @@ function parseWikidataPoint(value) {
   return { latitude, longitude };
 }
 
-function buildSparqlQuery(limit) {
-  const typeValues = RELIGIOUS_PLACE_TYPES.map(
-    (item) => `(wd:${item.qid} "${item.religion}")`
-  ).join("\n      ");
+function groupedPlaceTypes() {
+  const groups = new Map();
 
-  return `
-    SELECT ?place ?placeLabel ?religion ?countryLabel ?cityLabel ?coord ?description ?website ?image WHERE {
-      VALUES (?type ?religion) {
-        ${typeValues}
+  for (const item of RELIGIOUS_PLACE_TYPES) {
+    const existing = groups.get(item.religion) || [];
+    existing.push(item.qid);
+    groups.set(item.religion, existing);
+  }
+
+  return Array.from(groups, ([religion, qids]) => ({ religion, qids }));
+}
+
+function buildSparqlQuery(group, limit) {
+  const safeLimit = Number.isFinite(limit) && limit > 0 ? Math.floor(limit) : 2;
+  const typeValues = group.qids.map((qid) => `    wd:${qid}`).join("\n");
+  const escapedReligion = group.religion.replace(/"/g, "\\\"");
+
+  return `SELECT ?place ?placeLabel ?religion ?countryLabel ?cityLabel ?coord ?description ?website ?image WHERE {
+  VALUES ?type {
+${typeValues}
+  }
+  BIND("${escapedReligion}" AS ?religion)
+
+  ?place wdt:P31/wdt:P279* ?type;
+         wdt:P625 ?coord.
+
+  OPTIONAL { ?place wdt:P17 ?country. }
+  OPTIONAL { ?place wdt:P131 ?city. }
+  OPTIONAL { ?place wdt:P856 ?website. }
+  OPTIONAL { ?place wdt:P18 ?image. }
+
+  SERVICE wikibase:label {
+    bd:serviceParam wikibase:language "en".
+    ?place rdfs:label ?placeLabel.
+    ?country rdfs:label ?countryLabel.
+    ?city rdfs:label ?cityLabel.
+    ?place schema:description ?description.
+  }
+}
+LIMIT ${safeLimit}`;
+}
+
+function isRetryableStatus(status) {
+  return [500, 502, 503, 504].includes(status);
+}
+
+async function fetchWithTimeout(url, options, timeoutMs) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    return await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function fetchWikidataQuery(query, label) {
+  const bodyParams = new URLSearchParams({
+    query,
+    format: "json",
+  });
+
+  console.log(`Final Wikidata SPARQL query for ${label}:`);
+  console.log(query);
+
+  for (let attempt = 1; attempt <= WIKIDATA_RETRIES + 1; attempt += 1) {
+    try {
+      const response = await fetchWithTimeout(
+        WIKIDATA_SPARQL_URL,
+        {
+          method: "POST",
+          headers: {
+            Accept: "application/sparql-results+json",
+            "Content-Type": "application/x-www-form-urlencoded",
+            "User-Agent": USER_AGENT,
+          },
+          body: bodyParams,
+        },
+        WIKIDATA_TIMEOUT_MS
+      );
+      const responseBody = await response.text();
+
+      if (!response.ok) {
+        console.error(`Wikidata request failed with HTTP status ${response.status}.`);
+        console.error("Wikidata response body:");
+        console.error(responseBody);
+
+        if (isRetryableStatus(response.status) && attempt <= WIKIDATA_RETRIES) {
+          await sleep(attempt * 1500);
+          continue;
+        }
+
+        throw new Error(`Wikidata request failed with HTTP status ${response.status}.`);
       }
 
-      ?place wdt:P31/wdt:P279* ?type;
-             wdt:P625 ?coord.
+      const data = JSON.parse(responseBody);
+      const rows = data?.results?.bindings;
 
-      OPTIONAL { ?place wdt:P17 ?country. }
-      OPTIONAL { ?place wdt:P131 ?city. }
-      OPTIONAL { ?place wdt:P856 ?website. }
-      OPTIONAL { ?place wdt:P18 ?image. }
-      OPTIONAL {
-        ?place schema:description ?description.
-        FILTER(LANG(?description) = "en")
+      return Array.isArray(rows) ? rows : [];
+    } catch (error) {
+      const timedOut = error?.name === "AbortError";
+
+      if ((timedOut || error?.message?.includes("fetch failed")) && attempt <= WIKIDATA_RETRIES) {
+        console.warn(
+          `Wikidata ${label} attempt ${attempt} failed${timedOut ? " by timeout" : ""}. Retrying...`
+        );
+        await sleep(attempt * 1500);
+        continue;
       }
 
-      SERVICE wikibase:label {
-        bd:serviceParam wikibase:language "en".
+      if (timedOut) {
+        throw new Error(`Wikidata request timed out after ${WIKIDATA_TIMEOUT_MS} ms.`);
       }
+
+      throw error;
     }
-    ORDER BY ?religion ?placeLabel
-    LIMIT ${limit}
-  `;
+  }
+
+  return [];
 }
 
 async function fetchWikidataTemples() {
-  const url = new URL(WIKIDATA_SPARQL_URL);
-  url.searchParams.set("query", buildSparqlQuery(IMPORT_LIMIT));
-  url.searchParams.set("format", "json");
+  const rows = [];
+  const groups = groupedPlaceTypes();
+  const totalLimit = Number.isFinite(IMPORT_LIMIT) && IMPORT_LIMIT > 0 ? IMPORT_LIMIT : 10;
+  const perTypeLimit =
+    Number.isFinite(PER_TYPE_LIMIT) && PER_TYPE_LIMIT > 0 ? PER_TYPE_LIMIT : 2;
 
-  const response = await fetch(url, {
-    headers: {
-      Accept: "application/sparql-results+json",
-      "User-Agent": "RELIGIOUS Wikidata temple importer/1.0 (limited test import)",
-    },
-  });
-  const body = await response.text();
+  for (const group of groups) {
+    if (rows.length >= totalLimit) break;
 
-  if (!response.ok) {
-    throw new Error(`Wikidata ${response.status}: ${body.slice(0, 500)}`);
+    const remaining = totalLimit - rows.length;
+    const queryLimit = Math.min(perTypeLimit, remaining);
+    const query = buildSparqlQuery(group, queryLimit);
+
+    console.log(`Fetching ${group.religion}...`);
+    const groupRows = await fetchWikidataQuery(query, group.religion);
+    console.log(`Fetched ${groupRows.length} ${group.religion} records`);
+
+    rows.push(...groupRows.slice(0, remaining));
+
+    if (rows.length < totalLimit) {
+      await sleep(WIKIDATA_REQUEST_DELAY_MS);
+    }
   }
 
-  const data = JSON.parse(body);
-  const rows = data?.results?.bindings;
-
-  return Array.isArray(rows) ? rows : [];
+  return rows;
 }
 
 function bindingValue(row, key) {
@@ -271,6 +382,8 @@ async function insertTemple(temple) {
 async function main() {
   console.log("Starting Wikidata temple import...");
   console.log(`Import limit: ${IMPORT_LIMIT}`);
+  console.log(`Per type limit: ${PER_TYPE_LIMIT}`);
+  console.log(`Wikidata timeout: ${WIKIDATA_TIMEOUT_MS} ms`);
   console.log("Duplicate checks: name + latitude + longitude, then name + city + country");
 
   const rows = await fetchWikidataTemples();

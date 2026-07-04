@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
@@ -59,6 +59,37 @@ function googleMapsUrl(temple: TempleListTemple) {
   }
 
   return `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
+}
+
+function isNonEmptyString(value: string | null): value is string {
+  return Boolean(value && value.trim());
+}
+
+function uniqueSortedValues(temples: TempleListTemple[], field: "religion" | "country" | "city") {
+  return Array.from(
+    new Set(temples.map((temple) => temple[field]).filter(isNonEmptyString))
+  ).sort((first, second) => first.localeCompare(second));
+}
+
+function matchesTextSearch(temple: TempleListTemple, search: string) {
+  const normalizedSearch = search.trim().toLowerCase();
+
+  if (!normalizedSearch) return true;
+
+  const searchableText = [
+    temple.name,
+    temple.religion,
+    temple.denomination,
+    temple.country,
+    temple.city,
+    temple.address,
+    temple.description,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  return searchableText.includes(normalizedSearch);
 }
 
 function TempleCard({ temple }: { temple: TempleWithDistance }) {
@@ -124,11 +155,34 @@ export default function TemplesExplorerClient({
   pageSize: number;
 }) {
   const [page, setPage] = useState(initialPage);
+  const [search, setSearch] = useState("");
+  const [selectedReligion, setSelectedReligion] = useState("All");
+  const [selectedCountry, setSelectedCountry] = useState("All");
+  const [selectedCity, setSelectedCity] = useState("All");
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
   const [radiusKm, setRadiusKm] = useState(25);
   const [nearMeEnabled, setNearMeEnabled] = useState(false);
   const [locating, setLocating] = useState(false);
   const [locationMessage, setLocationMessage] = useState("");
+
+  const religionOptions = useMemo(
+    () => uniqueSortedValues(temples, "religion"),
+    [temples]
+  );
+
+  const countryOptions = useMemo(
+    () => uniqueSortedValues(temples, "country"),
+    [temples]
+  );
+
+  const cityOptions = useMemo(() => {
+    const countryFilteredTemples =
+      selectedCountry === "All"
+        ? temples
+        : temples.filter((temple) => temple.country === selectedCountry);
+
+    return uniqueSortedValues(countryFilteredTemples, "city");
+  }, [selectedCountry, temples]);
 
   async function findNearbyTemples() {
     setLocationMessage("");
@@ -162,12 +216,29 @@ export default function TemplesExplorerClient({
     );
   }
 
+  const filteredTemples = useMemo(() => {
+    return temples.filter((temple) => {
+      const matchesReligion =
+        selectedReligion === "All" || temple.religion === selectedReligion;
+      const matchesCountry =
+        selectedCountry === "All" || temple.country === selectedCountry;
+      const matchesCity = selectedCity === "All" || temple.city === selectedCity;
+
+      return (
+        matchesReligion &&
+        matchesCountry &&
+        matchesCity &&
+        matchesTextSearch(temple, search)
+      );
+    });
+  }, [search, selectedCity, selectedCountry, selectedReligion, temples]);
+
   const templesWithDistance = useMemo<TempleWithDistance[]>(() => {
-    return temples.map((temple) => ({
+    return filteredTemples.map((temple) => ({
       ...temple,
       distanceKm: userLocation ? distanceKm(userLocation, temple) : null,
     }));
-  }, [temples, userLocation]);
+  }, [filteredTemples, userLocation]);
 
   const visibleTemples = useMemo(() => {
     const result = templesWithDistance.filter((temple) => {
@@ -193,15 +264,137 @@ export default function TemplesExplorerClient({
   const currentPage = Math.min(Math.max(page, 1), totalPages);
   const start = (currentPage - 1) * pageSize;
   const paginatedTemples = visibleTemples.slice(start, start + pageSize);
+  const hasActiveFilters =
+    search.trim() !== "" ||
+    selectedReligion !== "All" ||
+    selectedCountry !== "All" ||
+    selectedCity !== "All" ||
+    nearMeEnabled;
+
+  function updateFilter(update: () => void) {
+    update();
+    setPage(1);
+  }
 
   function updateRadius(nextRadius: number) {
     setRadiusKm(nextRadius);
     setPage(1);
   }
 
+  function resetFilters() {
+    setSearch("");
+    setSelectedReligion("All");
+    setSelectedCountry("All");
+    setSelectedCity("All");
+    setNearMeEnabled(false);
+    setRadiusKm(25);
+    setPage(1);
+    setLocationMessage("");
+  }
+
   return (
     <section className="mt-8">
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+      <div className="rounded-2xl border border-[#D4AF37]/25 bg-white/5 p-5 shadow-2xl shadow-black/10">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-[#D4AF37]">Explore temples</h2>
+            <p className="mt-2 text-sm text-white/70">
+              Filter the loaded sacred places. The cards and map update together.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:justify-end">
+            <div className="rounded-2xl border border-white/10 bg-[#0F2744]/80 px-4 py-3">
+              <p className="text-xs font-bold uppercase text-white/50">Total loaded</p>
+              <p className="mt-1 text-2xl font-bold text-[#D4AF37]">{temples.length}</p>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-[#0F2744]/80 px-4 py-3">
+              <p className="text-xs font-bold uppercase text-white/50">Showing filtered</p>
+              <p className="mt-1 text-2xl font-bold text-[#D4AF37]">{visibleTemples.length}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-[1.35fr_1fr_1fr_1fr_auto] xl:items-end">
+          <label className="grid gap-2 text-sm font-bold text-[#F5D76E]" htmlFor="temple-text-search">
+            Search
+            <input
+              id="temple-text-search"
+              value={search}
+              onChange={(event) => updateFilter(() => setSearch(event.target.value))}
+              placeholder="Search by name, city, religion..."
+              className="min-h-12 w-full rounded-xl border border-[#D4AF37]/35 bg-[#071A2F] px-4 py-3 text-base text-white outline-none transition placeholder:text-white/40 focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20"
+            />
+          </label>
+
+          <label className="grid gap-2 text-sm font-bold text-[#F5D76E]" htmlFor="temple-religion-filter">
+            Religion
+            <select
+              id="temple-religion-filter"
+              value={selectedReligion}
+              onChange={(event) => updateFilter(() => setSelectedReligion(event.target.value))}
+              className="min-h-12 w-full rounded-xl border border-[#D4AF37]/35 bg-[#071A2F] px-4 py-3 text-base text-white outline-none transition focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20"
+            >
+              <option value="All">All religions</option>
+              {religionOptions.map((religion) => (
+                <option key={religion} value={religion}>
+                  {religion}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="grid gap-2 text-sm font-bold text-[#F5D76E]" htmlFor="temple-country-filter">
+            Country
+            <select
+              id="temple-country-filter"
+              value={selectedCountry}
+              onChange={(event) =>
+                updateFilter(() => {
+                  setSelectedCountry(event.target.value);
+                  setSelectedCity("All");
+                })
+              }
+              className="min-h-12 w-full rounded-xl border border-[#D4AF37]/35 bg-[#071A2F] px-4 py-3 text-base text-white outline-none transition focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20"
+            >
+              <option value="All">All countries</option>
+              {countryOptions.map((country) => (
+                <option key={country} value={country}>
+                  {country}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="grid gap-2 text-sm font-bold text-[#F5D76E]" htmlFor="temple-city-filter">
+            City
+            <select
+              id="temple-city-filter"
+              value={selectedCity}
+              onChange={(event) => updateFilter(() => setSelectedCity(event.target.value))}
+              className="min-h-12 w-full rounded-xl border border-[#D4AF37]/35 bg-[#071A2F] px-4 py-3 text-base text-white outline-none transition focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20"
+            >
+              <option value="All">All cities</option>
+              {cityOptions.map((city) => (
+                <option key={city} value={city}>
+                  {city}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <button
+            type="button"
+            onClick={resetFilters}
+            disabled={!hasActiveFilters}
+            className="min-h-12 rounded-xl border border-[#D4AF37]/40 px-5 py-3 font-bold text-[#F5D76E] transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-45 md:col-span-2 xl:col-span-1"
+          >
+            Reset filters
+          </button>
+        </div>
+      </div>
+
+      <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <h2 className="text-2xl font-bold text-[#D4AF37]">
@@ -264,7 +457,7 @@ export default function TemplesExplorerClient({
         <div className="mt-5 flex flex-col gap-2 text-sm text-white/70 sm:flex-row sm:items-center sm:justify-between">
           <p>
             Showing <span className="text-[#F5D76E]">{visibleTemples.length}</span>{" "}
-            of <span className="text-[#F5D76E]">{temples.length}</span> temples
+            of <span className="text-[#F5D76E]">{temples.length}</span> loaded temples
           </p>
           <p>
             Page {currentPage} of {totalPages}
@@ -278,7 +471,7 @@ export default function TemplesExplorerClient({
 
       {visibleTemples.length === 0 ? (
         <div className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-8 text-center text-white/70">
-          No temples found in this radius.
+          No temples match the current filters.
         </div>
       ) : (
         <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
