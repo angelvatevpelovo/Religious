@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import type { User } from "@supabase/supabase-js";
 import {
   BackLink,
   EmptyState,
@@ -11,24 +12,31 @@ import {
 } from "../../components/DesignSystem";
 import { supabase } from "../../lib/supabase";
 
-type ReminderType = "prayer" | "event" | "custom";
+type Frequency = "once" | "daily" | "weekly" | "monthly";
 
 type Reminder = {
   id: string;
   user_id: string;
   title: string;
   description: string | null;
-  reminder_type: ReminderType;
   reminder_time: string;
-  is_completed: boolean | null;
+  frequency: Frequency;
   created_at: string | null;
 };
 
-const reminderTypes: { value: ReminderType; label: string }[] = [
-  { value: "prayer", label: "Prayer" },
-  { value: "event", label: "Event" },
-  { value: "custom", label: "Custom" },
+const frequencyOptions: { value: Frequency; label: string }[] = [
+  { value: "once", label: "Once" },
+  { value: "daily", label: "Daily" },
+  { value: "weekly", label: "Weekly" },
+  { value: "monthly", label: "Monthly" },
 ];
+
+function getDefaultDateTime() {
+  const date = new Date();
+  date.setMinutes(date.getMinutes() - date.getTimezoneOffset() + 60);
+
+  return date.toISOString().slice(0, 16);
+}
 
 function formatReminderTime(value: string) {
   return new Intl.DateTimeFormat(undefined, {
@@ -37,24 +45,35 @@ function formatReminderTime(value: string) {
   }).format(new Date(value));
 }
 
-function getDefaultDateTime() {
-  const date = new Date();
-  date.setMinutes(date.getMinutes() - date.getTimezoneOffset() + 60);
-  return date.toISOString().slice(0, 16);
+function frequencyLabel(value: Frequency) {
+  return frequencyOptions.find((option) => option.value === value)?.label ?? value;
 }
 
 export default function RemindersClient() {
-  const [userId, setUserId] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [reminderType, setReminderType] = useState<ReminderType>("prayer");
   const [reminderTime, setReminderTime] = useState(getDefaultDateTime);
+  const [frequency, setFrequency] = useState<Frequency>("once");
+
+  const nextReminder = useMemo(
+    () =>
+      reminders
+        .filter((reminder) => new Date(reminder.reminder_time).getTime() >= Date.now())
+        .sort(
+          (first, second) =>
+            new Date(first.reminder_time).getTime() -
+            new Date(second.reminder_time).getTime()
+        )[0] ?? null,
+    [reminders]
+  );
 
   async function loadReminders(currentUserId: string) {
     setLoading(true);
@@ -62,17 +81,17 @@ export default function RemindersClient() {
 
     const { data, error: remindersError } = await supabase
       .from("reminders")
-      .select(
-        "id, user_id, title, description, reminder_type, reminder_time, is_completed, created_at"
-      )
+      .select("id, user_id, title, description, reminder_time, frequency, created_at")
       .eq("user_id", currentUserId)
       .order("reminder_time", { ascending: true });
 
     if (remindersError) {
       setReminders([]);
-      setError(remindersError.message);
+      setError(
+        `${remindersError.message}. If the reminders table is not migrated yet, run scripts/create-reminders.sql in Supabase.`
+      );
     } else {
-      setReminders((data ?? []) as unknown as Reminder[]);
+      setReminders((data ?? []) as Reminder[]);
     }
 
     setLoading(false);
@@ -83,16 +102,16 @@ export default function RemindersClient() {
 
     async function loadUserAndReminders() {
       const {
-        data: { user },
+        data: { user: currentUser },
       } = await supabase.auth.getUser();
 
       if (!isActive) return;
 
-      setUserId(user?.id ?? null);
+      setUser(currentUser);
       setAuthChecked(true);
 
-      if (user?.id) {
-        await loadReminders(user.id);
+      if (currentUser) {
+        await loadReminders(currentUser.id);
       } else {
         setLoading(false);
       }
@@ -105,15 +124,21 @@ export default function RemindersClient() {
     };
   }, []);
 
-  const upcomingCount = useMemo(
-    () => reminders.filter((reminder) => !reminder.is_completed).length,
-    [reminders]
-  );
-
   async function createReminder(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (!userId) return;
+    const {
+      data: { user: authenticatedUser },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !authenticatedUser) {
+      setUser(null);
+      setError("Please login again before creating a reminder.");
+      return;
+    }
+
+    setUser(authenticatedUser);
 
     const cleanTitle = title.trim();
 
@@ -132,50 +157,33 @@ export default function RemindersClient() {
     setMessage("");
 
     const { error: insertError } = await supabase.from("reminders").insert({
-      user_id: userId,
+      user_id: authenticatedUser.id,
       title: cleanTitle,
       description: description.trim() || null,
-      reminder_type: reminderType,
       reminder_time: new Date(reminderTime).toISOString(),
-      is_completed: false,
+      frequency,
     });
 
     if (insertError) {
-      setError(insertError.message);
+      setError(
+        `${insertError.message}. If the reminders table is not migrated yet, run scripts/create-reminders.sql in Supabase.`
+      );
     } else {
       setTitle("");
       setDescription("");
-      setReminderType("prayer");
       setReminderTime(getDefaultDateTime());
+      setFrequency("once");
       setMessage("Reminder created.");
-      await loadReminders(userId);
+      await loadReminders(authenticatedUser.id);
     }
 
     setSaving(false);
   }
 
-  async function toggleCompleted(reminder: Reminder) {
-    if (!userId) return;
-
-    setError("");
-    setMessage("");
-
-    const { error: updateError } = await supabase
-      .from("reminders")
-      .update({ is_completed: !reminder.is_completed })
-      .eq("id", reminder.id)
-      .eq("user_id", userId);
-
-    if (updateError) {
-      setError(updateError.message);
-    } else {
-      await loadReminders(userId);
-    }
-  }
-
   async function deleteReminder(id: string) {
-    if (!userId) return;
+    if (!user) return;
 
+    setDeletingId(id);
     setError("");
     setMessage("");
 
@@ -183,14 +191,16 @@ export default function RemindersClient() {
       .from("reminders")
       .delete()
       .eq("id", id)
-      .eq("user_id", userId);
+      .eq("user_id", user.id);
 
     if (deleteError) {
       setError(deleteError.message);
     } else {
       setMessage("Reminder deleted.");
-      await loadReminders(userId);
+      await loadReminders(user.id);
     }
+
+    setDeletingId(null);
   }
 
   return (
@@ -199,22 +209,23 @@ export default function RemindersClient() {
 
       <HeroPanel
         className="mt-10"
-        eyebrow="Smart Reminders"
-        title="Prayer and Event Reminders"
-        description="Create gentle reminders for prayers, religious events or personal spiritual routines."
+        eyebrow="Personal Reminders"
+        title="Reminders"
+        description="Create simple private reminders for prayer, reflection, study or sacred events. Notifications and email delivery will come later."
       />
 
       {!authChecked || loading ? (
         <GlassCard className="mt-8 p-6 text-[#CBD5E1]">
           Loading reminders...
         </GlassCard>
-      ) : !userId ? (
+      ) : !user ? (
         <GlassCard className="mt-8 p-8">
-          <h2 className="text-2xl font-bold text-[#F8FAFC]">
-            Login required
+          <h2 className="text-2xl font-bold text-[#D4AF37]">
+            Login to manage reminders
           </h2>
-          <p className="mt-3 max-w-2xl text-[#CBD5E1]">
-            Please login or create an account to manage your reminders.
+          <p className="mt-3 max-w-2xl leading-7 text-[#CBD5E1]">
+            Reminders are personal, so you need to login before creating or
+            viewing them.
           </p>
           <Link
             href="/auth"
@@ -226,17 +237,20 @@ export default function RemindersClient() {
       ) : (
         <div className="mt-8 grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
           <GlassCard className="p-6">
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <h2 className="text-2xl font-bold text-[#F8FAFC]">
-                  New Reminder
+                  New reminder
                 </h2>
-                <p className="mt-2 text-sm text-[#CBD5E1]">
-                  {upcomingCount} active reminders
+                <p className="mt-2 text-sm leading-6 text-[#CBD5E1]">
+                  {reminders.length} saved reminders
+                  {nextReminder
+                    ? `, next on ${formatReminderTime(nextReminder.reminder_time)}`
+                    : ""}
                 </p>
               </div>
               <span className="rounded-full border border-[#D4AF37]/40 bg-[#D4AF37]/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-[#F5D76E]">
-                Smart
+                MVP
               </span>
             </div>
 
@@ -246,26 +260,9 @@ export default function RemindersClient() {
                 <input
                   value={title}
                   onChange={(event) => setTitle(event.target.value)}
-                  placeholder="Morning prayer, Vesak, Family reflection..."
-                  className="rounded-2xl border border-white/12 bg-white/[0.06] px-4 py-3 text-base text-[#F8FAFC] outline-none transition placeholder:text-[#CBD5E1]/55 focus:border-[#D4AF37]"
+                  placeholder="Morning prayer, scripture reading, quiet reflection..."
+                  className="min-h-12 rounded-2xl border border-white/12 bg-white/[0.06] px-4 py-3 text-base text-[#F8FAFC] outline-none transition placeholder:text-[#CBD5E1]/55 focus:border-[#D4AF37]"
                 />
-              </label>
-
-              <label className="grid gap-2 text-sm font-semibold text-[#F5D76E]">
-                Type
-                <select
-                  value={reminderType}
-                  onChange={(event) =>
-                    setReminderType(event.target.value as ReminderType)
-                  }
-                  className="rounded-2xl border border-white/12 bg-[#0F2744] px-4 py-3 text-base text-[#F8FAFC] outline-none transition focus:border-[#D4AF37]"
-                >
-                  {reminderTypes.map((type) => (
-                    <option key={type.value} value={type.value}>
-                      {type.label}
-                    </option>
-                  ))}
-                </select>
               </label>
 
               <label className="grid gap-2 text-sm font-semibold text-[#F5D76E]">
@@ -274,8 +271,23 @@ export default function RemindersClient() {
                   type="datetime-local"
                   value={reminderTime}
                   onChange={(event) => setReminderTime(event.target.value)}
-                  className="rounded-2xl border border-white/12 bg-white/[0.06] px-4 py-3 text-base text-[#F8FAFC] outline-none transition focus:border-[#D4AF37]"
+                  className="min-h-12 rounded-2xl border border-white/12 bg-white/[0.06] px-4 py-3 text-base text-[#F8FAFC] outline-none transition focus:border-[#D4AF37]"
                 />
+              </label>
+
+              <label className="grid gap-2 text-sm font-semibold text-[#F5D76E]">
+                Frequency
+                <select
+                  value={frequency}
+                  onChange={(event) => setFrequency(event.target.value as Frequency)}
+                  className="min-h-12 rounded-2xl border border-white/12 bg-[#0F2744] px-4 py-3 text-base text-[#F8FAFC] outline-none transition focus:border-[#D4AF37]"
+                >
+                  {frequencyOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
               </label>
 
               <label className="grid gap-2 text-sm font-semibold text-[#F5D76E]">
@@ -294,7 +306,7 @@ export default function RemindersClient() {
                 disabled={saving}
                 className="rounded-2xl bg-[#D4AF37] px-5 py-3 text-sm font-bold text-[#071A2F] transition hover:bg-[#F5D76E] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {saving ? "Saving..." : "Create Reminder"}
+                {saving ? "Saving..." : "Create reminder"}
               </button>
             </form>
 
@@ -311,34 +323,23 @@ export default function RemindersClient() {
             )}
           </GlassCard>
 
-          <section className="grid gap-4">
+          <section className="grid gap-4 content-start">
             {reminders.length === 0 ? (
               <EmptyState
                 title="No reminders yet"
-                description="Create your first prayer, event or custom reminder."
+                description="Create your first personal prayer, reflection or study reminder."
               />
             ) : (
               reminders.map((reminder) => (
                 <article
                   key={reminder.id}
-                  className={`rounded-[2rem] border p-5 shadow-2xl shadow-black/20 backdrop-blur-xl transition ${
-                    reminder.is_completed
-                      ? "border-white/10 bg-white/[0.035] opacity-75"
-                      : "border-white/12 bg-white/[0.06]"
-                  }`}
+                  className="rounded-[2rem] border border-white/12 bg-white/[0.06] p-5 shadow-2xl shadow-black/20 backdrop-blur-xl"
                 >
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="rounded-full border border-[#D4AF37]/35 bg-[#D4AF37]/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-[#F5D76E]">
-                          {reminder.reminder_type}
-                        </span>
-                        {reminder.is_completed && (
-                          <span className="rounded-full border border-emerald-300/25 bg-emerald-400/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-emerald-100">
-                            Completed
-                          </span>
-                        )}
-                      </div>
+                      <span className="rounded-full border border-[#D4AF37]/35 bg-[#D4AF37]/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-[#F5D76E]">
+                        {frequencyLabel(reminder.frequency)}
+                      </span>
 
                       <h2 className="mt-4 text-2xl font-bold text-[#F8FAFC]">
                         {reminder.title}
@@ -353,22 +354,14 @@ export default function RemindersClient() {
                       )}
                     </div>
 
-                    <div className="flex shrink-0 flex-wrap gap-2">
-                      <button
-                        type="button"
-                        onClick={() => toggleCompleted(reminder)}
-                        className="rounded-2xl border border-white/12 bg-white/[0.06] px-4 py-2 text-sm font-bold text-[#F5D76E] transition hover:border-[#D4AF37]/60 hover:bg-white/10"
-                      >
-                        {reminder.is_completed ? "Reopen" : "Complete"}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => deleteReminder(reminder.id)}
-                        className="rounded-2xl border border-red-300/30 bg-red-500/10 px-4 py-2 text-sm font-bold text-red-100 transition hover:bg-red-500/20"
-                      >
-                        Delete
-                      </button>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => deleteReminder(reminder.id)}
+                      disabled={deletingId === reminder.id}
+                      className="shrink-0 rounded-2xl border border-red-300/30 bg-red-500/10 px-4 py-2 text-sm font-bold text-red-100 transition hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {deletingId === reminder.id ? "Deleting..." : "Delete"}
+                    </button>
                   </div>
                 </article>
               ))
