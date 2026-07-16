@@ -1,5 +1,15 @@
+import type { Metadata } from "next";
 import { HeroPanel, PageShell } from "../../components/DesignSystem";
 import AIClient from "./AIClient";
+
+export const metadata: Metadata = {
+  title: "AI Religious Guide",
+  description:
+    "Ask spiritual and religious questions and receive informational, reflective AI guidance.",
+  alternates: {
+    canonical: "/ai",
+  },
+};
 
 export default function AIPage() {
   return (

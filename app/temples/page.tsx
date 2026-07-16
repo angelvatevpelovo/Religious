@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { supabase } from "../../lib/supabase";
 import TemplesExplorerClient from "./TemplesExplorerClient";
 import type { TempleListTemple } from "./types";
@@ -7,6 +8,15 @@ const PAGE_SIZE = 24;
 const FETCH_PAGE_SIZE = 1000;
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Temples and Sacred Places",
+  description:
+    "Explore temples and sacred places with cards, search filters and an interactive map.",
+  alternates: {
+    canonical: "/temples",
+  },
+};
 
 type TempleFilter = {
   country: string;

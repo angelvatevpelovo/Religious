@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import {
   BackLink,
   EmptyState,
@@ -8,6 +9,15 @@ import {
 import { supabase } from "../../lib/supabase";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Holy Books",
+  description:
+    "Browse sacred texts and holy books for reading, study and reflection in RELIGIOUS.",
+  alternates: {
+    canonical: "/book",
+  },
+};
 
 export default async function BooksPage() {
   const { data: books, error } = await supabase

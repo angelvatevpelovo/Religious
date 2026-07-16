@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import {
   EmptyState,
   FeatureCard,
@@ -12,6 +13,15 @@ import { getServerLocale } from "../lib/i18n-server";
 import { supabase } from "../lib/supabase";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "RELIGIOUS",
+  description:
+    "A calm spiritual companion for sacred texts, prayers, temples, favorites and reflective AI guidance.",
+  alternates: {
+    canonical: "/",
+  },
+};
 
 type MaybeArray<T> = T | T[] | null;
 
