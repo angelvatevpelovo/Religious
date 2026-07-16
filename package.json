@@ -11,6 +11,7 @@
     "import:dhammapada": "node --use-system-ca scripts/import-dhammapada.js",
     "import:bhagavad-gita": "node --use-system-ca scripts/import-bhagavad-gita.js",
     "import:quran": "node --use-system-ca scripts/import-quran.js",
+    "import:upanishads": "node --use-system-ca scripts/import-upanishads.js",
     "enrich:temple-images": "node --use-system-ca scripts/enrich-temple-images.js",
     "lint": "eslint"
   },
