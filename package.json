@@ -10,6 +10,7 @@
     "import:tao-te-ching": "node --use-system-ca scripts/import-tao-te-ching.js",
     "import:dhammapada": "node --use-system-ca scripts/import-dhammapada.js",
     "import:diamond-sutra": "node --use-system-ca scripts/import-diamond-sutra.js",
+    "import:lotus-sutra": "node --use-system-ca scripts/import-lotus-sutra.js",
     "import:bhagavad-gita": "node --use-system-ca scripts/import-bhagavad-gita.js",
     "import:quran": "node --use-system-ca scripts/import-quran.js",
     "import:upanishads": "node --use-system-ca scripts/import-upanishads.js",
