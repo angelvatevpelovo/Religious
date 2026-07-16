@@ -8,6 +8,7 @@
     "start": "next start",
     "import:world": "node --use-system-ca scripts/import-osm-temples.js",
     "import:tao-te-ching": "node --use-system-ca scripts/import-tao-te-ching.js",
+    "import:dhammapada": "node --use-system-ca scripts/import-dhammapada.js",
     "enrich:temple-images": "node --use-system-ca scripts/enrich-temple-images.js",
     "lint": "eslint"
   },
