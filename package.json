@@ -17,6 +17,7 @@
     "import:uttaradhyayana": "node --use-system-ca scripts/import-uttaradhyayana.js",
     "import:jps1917-torah": "node --use-system-ca scripts/import-jps1917-torah.js",
     "import:japji-sahib": "node --use-system-ca scripts/import-japji-sahib.js",
+    "import:kojiki-divine-age": "node --use-system-ca scripts/import-kojiki-divine-age.js",
     "enrich:temple-images": "node --use-system-ca scripts/enrich-temple-images.js",
     "lint": "eslint"
   },
