@@ -14,6 +14,8 @@
     "import:upanishads": "node --use-system-ca scripts/import-upanishads.js",
     "import:analects": "node --use-system-ca scripts/import-analects.js",
     "import:zend-avesta": "node --use-system-ca scripts/import-zend-avesta.js",
+    "import:uttaradhyayana": "node --use-system-ca scripts/import-uttaradhyayana.js",
+    "import:jps1917-torah": "node --use-system-ca scripts/import-jps1917-torah.js",
     "enrich:temple-images": "node --use-system-ca scripts/enrich-temple-images.js",
     "lint": "eslint"
   },
