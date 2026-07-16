@@ -15,6 +15,7 @@
     "import:quran": "node --use-system-ca scripts/import-quran.js",
     "import:upanishads": "node --use-system-ca scripts/import-upanishads.js",
     "import:analects": "node --use-system-ca scripts/import-analects.js",
+    "import:zhuangzi-inner-chapters": "node --use-system-ca scripts/import-zhuangzi-inner-chapters.js",
     "import:zend-avesta": "node --use-system-ca scripts/import-zend-avesta.js",
     "import:uttaradhyayana": "node --use-system-ca scripts/import-uttaradhyayana.js",
     "import:jps1917-torah": "node --use-system-ca scripts/import-jps1917-torah.js",
