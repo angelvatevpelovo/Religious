@@ -16,6 +16,7 @@
     "import:zend-avesta": "node --use-system-ca scripts/import-zend-avesta.js",
     "import:uttaradhyayana": "node --use-system-ca scripts/import-uttaradhyayana.js",
     "import:jps1917-torah": "node --use-system-ca scripts/import-jps1917-torah.js",
+    "import:jps1917-neviim-ketuvim": "node --use-system-ca scripts/import-jps1917-neviim-ketuvim.js",
     "import:japji-sahib": "node --use-system-ca scripts/import-japji-sahib.js",
     "import:kojiki-divine-age": "node --use-system-ca scripts/import-kojiki-divine-age.js",
     "enrich:temple-images": "node --use-system-ca scripts/enrich-temple-images.js",
