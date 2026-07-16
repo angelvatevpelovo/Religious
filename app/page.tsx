@@ -2,9 +2,7 @@ import type { Metadata } from "next";
 import {
   EmptyState,
   FeatureCard,
-  GlassCard,
   GoldButton,
-  HeroPanel,
   PageShell,
   SectionHeader,
 } from "../components/DesignSystem";
@@ -190,40 +188,153 @@ export default async function HomePage() {
 
   const prayerReligion = firstValue(prayerOfDay?.religions);
   const verseChapter = firstValue(verseOfDay?.chapters);
+  const featureCards = [
+    {
+      eyebrow: "Study",
+      title: "Bible Search",
+      description:
+        "Search scripture quickly and return to passages with a calm, focused reading flow.",
+      href: "/search",
+    },
+    {
+      eyebrow: "Library",
+      title: "Holy Books",
+      description:
+        "Explore sacred texts and chapters through a simple, respectful digital library.",
+      href: "/book",
+    },
+    {
+      eyebrow: "Prayer",
+      title: "Prayers",
+      description:
+        "Find reflective prayers and spiritual resources for daily moments of stillness.",
+      href: prayerOfDay?.id ? `/prayer/${prayerOfDay.id}` : "/book",
+    },
+    {
+      eyebrow: "Places",
+      title: "Temples Map",
+      description:
+        "Discover sacred places with cards, filters and an interactive temple map.",
+      href: "/temples",
+    },
+    {
+      eyebrow: "Guide",
+      title: "AI Assistant",
+      description:
+        "Ask spiritual questions and receive careful, informational guidance.",
+      href: "/ai",
+    },
+  ];
 
   return (
-    <PageShell>
-      <HeroPanel
-        eyebrow={t.heroEyebrow}
-        title={t.heroTitle}
-        description={t.heroDescription}
-        action={
-          <>
-            <GoldButton href="/search">{t.searchScripture}</GoldButton>
-            <GoldButton
-              href="/ai"
-              className="border border-white/12 bg-white/[0.06] text-[#F8FAFC] hover:bg-white/10"
-            >
-              {t.askAssistant}
-            </GoldButton>
-          </>
-        }
-      >
-        <GlassCard className="p-6 sm:p-8">
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#F5D76E]">
-            {t.today}
-          </p>
-          <h2 className="mt-4 text-3xl font-bold text-[#F8FAFC]">
-            {t.stillness}
-          </h2>
-          <div className="mt-8 grid gap-3 sm:grid-cols-2">
-            <FeatureCard title={t.libraryTitle} href="/book" eyebrow={t.read} />
-            <FeatureCard title={dictionaries[locale].nav.temples} href="/temples" eyebrow={t.explore} />
-            <FeatureCard title={dictionaries[locale].nav.calendar} href="/calendar" eyebrow={t.observe} />
-            <FeatureCard title={dictionaries[locale].nav.reminders} href="/reminders" eyebrow={t.return} />
+    <PageShell className="relative overflow-hidden">
+      <div className="cosmic-grid pointer-events-none absolute inset-0 opacity-60" />
+      <div className="pointer-events-none absolute left-[-8rem] top-24 h-80 w-80 rounded-full bg-[#D4AF37]/20 blur-3xl" />
+      <div className="pointer-events-none absolute right-[-10rem] top-48 h-96 w-96 rounded-full bg-sky-400/10 blur-3xl" />
+
+      <div className="relative">
+        <section className="gold-aura overflow-hidden rounded-[2.5rem] border border-white/15 bg-[#071A2F]/70 p-6 shadow-2xl shadow-black/35 backdrop-blur-2xl sm:p-8 lg:p-12">
+          <div className="grid gap-10 lg:grid-cols-[1.04fr_0.96fr] lg:items-center">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.28em] text-[#F5D76E]">
+                RELIGIOUS
+              </p>
+              <h1 className="mt-5 max-w-5xl text-5xl font-black tracking-normal text-[#F8FAFC] sm:text-6xl lg:text-7xl">
+                A spiritual web app for the next era of sacred discovery.
+              </h1>
+              <p className="mt-6 max-w-3xl text-lg leading-8 text-[#DCE7F4] sm:text-xl">
+                Search scripture, explore holy books, find prayers, discover
+                sacred places and ask reflective questions in one respectful
+                multi-faith space.
+              </p>
+
+              <div className="mt-8 flex flex-wrap gap-3">
+                <GoldButton href="/search">Search</GoldButton>
+                <GoldButton
+                  href="/book"
+                  className="border border-white/14 bg-white/[0.07] text-[#F8FAFC] hover:bg-white/[0.12]"
+                >
+                  Holy Books
+                </GoldButton>
+                <GoldButton
+                  href="/temples"
+                  className="border border-white/14 bg-white/[0.07] text-[#F8FAFC] hover:bg-white/[0.12]"
+                >
+                  Temples
+                </GoldButton>
+                <GoldButton
+                  href="/ai"
+                  className="border border-[#D4AF37]/35 bg-[#D4AF37]/10 text-[#F5D76E] hover:bg-[#D4AF37]/18"
+                >
+                  AI Assistant
+                </GoldButton>
+              </div>
+            </div>
+
+            <div className="premium-glass relative overflow-hidden rounded-[2rem] p-6 sm:p-8">
+              <div className="absolute right-[-4rem] top-[-4rem] h-48 w-48 rounded-full bg-[#D4AF37]/20 blur-3xl" />
+              <div className="relative">
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#F5D76E]">
+                  {t.today}
+                </p>
+                <h2 className="mt-4 text-3xl font-bold text-[#F8FAFC]">
+                  {t.stillness}
+                </h2>
+                <p className="mt-4 leading-7 text-[#CBD5E1]">
+                  A quiet daily constellation from prayer, scripture, calendar
+                  and sacred places.
+                </p>
+                <div className="mt-8 grid gap-3 sm:grid-cols-2">
+                  <FeatureCard
+                    title={t.libraryTitle}
+                    href="/book"
+                    eyebrow={t.read}
+                    className="rounded-[1.5rem] bg-white/[0.055]"
+                  />
+                  <FeatureCard
+                    title={dictionaries[locale].nav.temples}
+                    href="/temples"
+                    eyebrow={t.explore}
+                    className="rounded-[1.5rem] bg-white/[0.055]"
+                  />
+                  <FeatureCard
+                    title={dictionaries[locale].nav.calendar}
+                    href="/calendar"
+                    eyebrow={t.observe}
+                    className="rounded-[1.5rem] bg-white/[0.055]"
+                  />
+                  <FeatureCard
+                    title={dictionaries[locale].nav.reminders}
+                    href="/reminders"
+                    eyebrow={t.return}
+                    className="rounded-[1.5rem] bg-white/[0.055]"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
-        </GlassCard>
-      </HeroPanel>
+        </section>
+
+        <section className="mt-16">
+          <SectionHeader
+            eyebrow="Core tools"
+            title="A premium spiritual workspace"
+            description="RELIGIOUS keeps the essentials close: text, prayer, sacred places and reflective guidance, all designed for clarity rather than noise."
+          />
+
+          <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-5">
+            {featureCards.map((card) => (
+              <FeatureCard
+                key={card.title}
+                eyebrow={card.eyebrow}
+                title={card.title}
+                description={card.description}
+                href={card.href}
+                className="premium-glass rounded-[1.75rem]"
+              />
+            ))}
+          </div>
+        </section>
 
       <section className="mt-16">
         <SectionHeader
@@ -366,6 +477,7 @@ export default async function HomePage() {
           )}
         </div>
       </section>
+      </div>
     </PageShell>
   );
 }
