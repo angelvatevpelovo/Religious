@@ -7,6 +7,30 @@ import {
 } from "../../../components/DesignSystem";
 import { supabase } from "../../../lib/supabase";
 
+type ChapterRow = {
+  id: string;
+  title: string | null;
+  chapter_number: number | null;
+  section_label?: string | null;
+  display_title?: string | null;
+  sort_order?: number | null;
+};
+
+function formatSectionTitle(chapter: ChapterRow) {
+  if (chapter.display_title?.trim()) {
+    return chapter.display_title;
+  }
+
+  const title = chapter.title?.trim();
+  const number = chapter.chapter_number;
+
+  if (title && number !== null && number !== undefined) {
+    return `${title} ${number}`;
+  }
+
+  return title || `${chapter.section_label || "Section"} ${number ?? ""}`.trim();
+}
+
 export default async function BookPage({
   params,
 }: {
@@ -20,14 +44,19 @@ export default async function BookPage({
     .eq("id", id)
     .single();
 
-  const { data: chapters } = await supabase
+  const { data: chaptersData } = await supabase
     .from("chapters")
-    .select("title")
-    .eq("book_id", id);
+    .select("*")
+    .eq("book_id", id)
+    .order("chapter_number", { ascending: true });
 
-  const bibleBooks = Array.from(
-    new Set(chapters?.map((chapter) => chapter.title) || [])
-  );
+  const chapters = ((chaptersData ?? []) as ChapterRow[]).sort((first, second) => {
+    const firstOrder = first.sort_order ?? first.chapter_number ?? 0;
+    const secondOrder = second.sort_order ?? second.chapter_number ?? 0;
+
+    return firstOrder - secondOrder;
+  });
+  const sectionLabel = chapters[0]?.section_label || "Section";
 
   return (
     <PageShell>
@@ -41,20 +70,24 @@ export default async function BookPage({
       />
 
       <section className="mt-12">
-        <h2 className="text-2xl font-bold text-[#F5D76E]">Books</h2>
+        <h2 className="text-2xl font-bold text-[#F5D76E]">Sections</h2>
+        <p className="mt-3 max-w-2xl text-[#CBD5E1]">
+          Open a {sectionLabel.toLowerCase()} to continue reading this sacred
+          text.
+        </p>
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {bibleBooks.length === 0 ? (
+          {chapters.length === 0 ? (
             <div className="sm:col-span-2 lg:col-span-3 xl:col-span-4">
-              <EmptyState title="No chapters found" />
+              <EmptyState title="No sections found" />
             </div>
           ) : (
-            bibleBooks.map((bibleBook) => (
+            chapters.map((chapter) => (
               <FeatureCard
-                key={bibleBook}
-                href={`/bible-book/${encodeURIComponent(bibleBook)}`}
-                eyebrow="Book"
-                title={bibleBook}
+                key={chapter.id}
+                href={`/chapter/${chapter.id}`}
+                eyebrow={chapter.section_label || "Section"}
+                title={formatSectionTitle(chapter)}
                 className="p-5"
               />
             ))

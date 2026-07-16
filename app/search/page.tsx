@@ -128,10 +128,10 @@ export default function SearchPage() {
           <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-end">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.28em] text-[#F5D76E]">
-                Scripture Search
+                Sacred Text Search
               </p>
               <h1 className="mt-4 max-w-3xl text-5xl font-black tracking-normal text-[#F8FAFC] sm:text-6xl">
-                Search the KJV Bible with clarity.
+                Search holy books with clarity.
               </h1>
               <p className="mt-5 max-w-2xl text-lg leading-8 text-[#CBD5E1]">
                 Enter a word or phrase and open any result directly in its
@@ -141,19 +141,19 @@ export default function SearchPage() {
 
             <div className="premium-glass rounded-[2rem] p-4 sm:p-5">
               <div className="mb-3 flex items-center justify-between gap-3 text-xs font-bold uppercase tracking-[0.18em] text-[#F5D76E]">
-                <span>Bible verse query</span>
+                <span>Sacred text query</span>
                 <span className="rounded-full border border-[#D4AF37]/35 bg-[#D4AF37]/10 px-3 py-1 text-[#F5D76E]">
-                  KJV
+                  Holy Books
                 </span>
               </div>
             <label htmlFor="bible-search" className="sr-only">
-              Search Bible verses
+              Search sacred text passages
             </label>
             <input
               id="bible-search"
               value={query}
               onChange={(event) => handleQueryChange(event.target.value)}
-              placeholder="Search verses by word or phrase..."
+              placeholder="Search passages by word or phrase..."
                 className="w-full rounded-[1.4rem] border border-white/12 bg-white/[0.08] px-5 py-4 text-lg text-white shadow-inner shadow-black/20 outline-none transition placeholder:text-white/40 focus:border-[#D4AF37]/80 focus:bg-white/[0.12] focus:shadow-[#D4AF37]/10"
             />
               <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-[#CBD5E1]">
@@ -183,7 +183,7 @@ export default function SearchPage() {
 
           {!loading && !error && searched && results.length === 0 && (
             <p className="premium-glass rounded-[1.75rem] p-5 text-[#CBD5E1]">
-              No verses found.
+              No passages found.
             </p>
           )}
 
@@ -194,7 +194,7 @@ export default function SearchPage() {
                   Results
                 </p>
                 <p className="text-sm text-[#CBD5E1]">
-                  Showing {results.length} matching verses
+                  Showing {results.length} matching passages
                 </p>
               </div>
 
@@ -206,7 +206,7 @@ export default function SearchPage() {
                 >
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <p className="text-lg font-bold text-[#F5D76E]">
-                      {verse.chapters?.title ?? "Bible"}{" "}
+                      {verse.chapters?.title ?? "Sacred text"}{" "}
                       {verse.chapters?.chapter_number ?? "?"}:
                       {verse.verse_number}
                     </p>
