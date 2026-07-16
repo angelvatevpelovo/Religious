@@ -12,6 +12,8 @@
     "import:bhagavad-gita": "node --use-system-ca scripts/import-bhagavad-gita.js",
     "import:quran": "node --use-system-ca scripts/import-quran.js",
     "import:upanishads": "node --use-system-ca scripts/import-upanishads.js",
+    "import:analects": "node --use-system-ca scripts/import-analects.js",
+    "import:zend-avesta": "node --use-system-ca scripts/import-zend-avesta.js",
     "enrich:temple-images": "node --use-system-ca scripts/enrich-temple-images.js",
     "lint": "eslint"
   },
@@ -41,3 +43,4 @@
     "typescript": "^5"
   }
 }
+
