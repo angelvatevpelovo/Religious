@@ -16,6 +16,7 @@
     "import:upanishads": "node --use-system-ca scripts/import-upanishads.js",
     "import:analects": "node --use-system-ca scripts/import-analects.js",
     "import:mencius": "node --use-system-ca scripts/import-mencius.js",
+    "import:confucian-extra": "node --use-system-ca scripts/import-confucian-four-books-extra.js",
     "import:zhuangzi-inner-chapters": "node --use-system-ca scripts/import-zhuangzi-inner-chapters.js",
     "import:zend-avesta": "node --use-system-ca scripts/import-zend-avesta.js",
     "import:uttaradhyayana": "node --use-system-ca scripts/import-uttaradhyayana.js",
