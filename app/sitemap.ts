@@ -4,7 +4,17 @@ const baseUrl = "https://religious-rb2l.vercel.app";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
-  const routes = ["/", "/search", "/book", "/temples", "/ai", "/reminders"];
+  const routes = [
+    "/",
+    "/search",
+    "/book",
+    "/temples",
+    "/ai",
+    "/reminders",
+    "/about",
+    "/privacy",
+    "/terms",
+  ];
 
   return routes.map((route) => ({
     url: `${baseUrl}${route}`,
