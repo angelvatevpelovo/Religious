@@ -12,6 +12,7 @@
     "import:dhammapada": "node --use-system-ca scripts/import-dhammapada.js",
     "import:diamond-sutra": "node --use-system-ca scripts/import-diamond-sutra.js",
     "import:lotus-sutra": "node --use-system-ca scripts/import-lotus-sutra.js",
+    "import:pure-land-sutras": "node --use-system-ca scripts/import-pure-land-sutras.js",
     "import:bhagavad-gita": "node --use-system-ca scripts/import-bhagavad-gita.js",
     "import:yoga-sutras": "node --use-system-ca scripts/import-yoga-sutras.js",
     "import:quran": "node --use-system-ca scripts/import-quran.js",
