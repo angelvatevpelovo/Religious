@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "import:world": "node --use-system-ca scripts/import-osm-temples.js",
+    "import:book-of-mormon": "node --use-system-ca scripts/import-book-of-mormon.js",
     "import:tao-te-ching": "node --use-system-ca scripts/import-tao-te-ching.js",
     "import:dhammapada": "node --use-system-ca scripts/import-dhammapada.js",
     "import:diamond-sutra": "node --use-system-ca scripts/import-diamond-sutra.js",
