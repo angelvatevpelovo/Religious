@@ -12,6 +12,7 @@
     "import:diamond-sutra": "node --use-system-ca scripts/import-diamond-sutra.js",
     "import:lotus-sutra": "node --use-system-ca scripts/import-lotus-sutra.js",
     "import:bhagavad-gita": "node --use-system-ca scripts/import-bhagavad-gita.js",
+    "import:yoga-sutras": "node --use-system-ca scripts/import-yoga-sutras.js",
     "import:quran": "node --use-system-ca scripts/import-quran.js",
     "import:upanishads": "node --use-system-ca scripts/import-upanishads.js",
     "import:analects": "node --use-system-ca scripts/import-analects.js",
