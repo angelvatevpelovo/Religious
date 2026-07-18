@@ -41,27 +41,44 @@ const secondaryLinks = [
   { href: "/ai-history", label: "AI History" },
 ];
 
-function SacredRings() {
+const sacredSymbols = [
+  { symbol: "\u271d", className: "sacred-symbol-one" },
+  { symbol: "\u262a", className: "sacred-symbol-two" },
+  { symbol: "\u2721", className: "sacred-symbol-three" },
+  { symbol: "\u2638", className: "sacred-symbol-four" },
+  { symbol: "\u0950", className: "sacred-symbol-five" },
+  { symbol: "\u262f", className: "sacred-symbol-six" },
+  { symbol: "\u262c", className: "sacred-symbol-seven" },
+  { symbol: "\u2625", className: "sacred-symbol-eight" },
+];
+
+function HeroAtmosphere() {
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-      <div className="sacred-depth-field absolute inset-0" />
-      <div className="sacred-ring sacred-ring-one" />
-      <div className="sacred-ring sacred-ring-two" />
-      <div className="sacred-ring sacred-ring-three" />
-      <div className="cosmic-grid absolute inset-0 opacity-35" />
+      <div className="sacred-symbol-field absolute inset-0">
+        {sacredSymbols.map((item) => (
+          <span key={item.className} className={`sacred-symbol ${item.className}`}>
+            {item.symbol}
+          </span>
+        ))}
+      </div>
+      <div className="hero-image-stardust absolute inset-0" />
+      <div className="hero-portal-glow absolute" />
+      <div className="hero-bottom-vignette absolute inset-x-0 bottom-0" />
     </div>
   );
 }
 
 export default function HomePage() {
   return (
-    <PageShell className="relative overflow-hidden">
-      <SacredRings />
-
+    <PageShell className="home-page-shell relative overflow-hidden">
       <div className="relative">
-        <section className="relative flex min-h-[calc(100svh-9rem)] items-center py-10 sm:py-14 lg:py-20">
-          <div className="mx-auto grid w-full gap-10 lg:grid-cols-[1.06fr_0.94fr] lg:items-center">
-            <div className="max-w-4xl">
+        <section className="home-hero-image relative left-1/2 -mt-28 flex min-h-screen w-screen -translate-x-1/2 items-center overflow-hidden px-4 pb-14 pt-36 sm:px-8 sm:pb-16 sm:pt-40 lg:px-10 lg:pb-20 lg:pt-44">
+          <HeroAtmosphere />
+
+          <div className="relative z-10 mx-auto grid w-full max-w-7xl gap-10 lg:grid-cols-[1.02fr_0.98fr] lg:items-center">
+            <div className="relative max-w-4xl lg:pr-10">
+              <div className="hero-readability-field absolute -inset-x-8 -inset-y-10 -z-10 rounded-[3rem]" />
               <div className="inline-flex rounded-full border border-[#D4AF37]/35 bg-[#D4AF37]/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-[#F5D76E] shadow-lg shadow-[#D4AF37]/10 backdrop-blur">
                 Sacred wisdom across humanity
               </div>
@@ -91,31 +108,17 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="relative mx-auto w-full max-w-lg lg:max-w-none">
-              <div className="premium-glass sacred-orbit-panel relative min-h-[24rem] overflow-hidden rounded-[2rem] p-7 sm:p-8">
-                <div className="absolute inset-8 rounded-full border border-[#D4AF37]/20" />
-                <div className="absolute inset-16 rounded-full border border-white/10" />
-                <div className="absolute left-1/2 top-1/2 h-36 w-36 -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#D4AF37]/40 bg-[#D4AF37]/10 shadow-[0_0_80px_rgba(212,175,55,0.22)]" />
-                <div className="relative flex min-h-[20rem] flex-col justify-end">
-                  <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#F5D76E]">
-                    Calm digital sanctuary
-                  </p>
-                  <p className="mt-4 max-w-sm text-2xl font-semibold leading-9 text-[#F8FAFC]">
-                    A quieter way to study, reflect and return to what matters.
-                  </p>
-                </div>
-              </div>
-            </div>
+            <div className="hero-image-focus min-h-[16rem] sm:min-h-[24rem] lg:min-h-[34rem]" aria-hidden="true" />
           </div>
         </section>
 
-        <section className="pb-12">
+        <section className="home-cards-section relative z-10 pb-12 pt-12">
           <div className="grid gap-4 md:grid-cols-3">
             {mainFeatures.map((feature) => (
               <Link
                 key={feature.title}
                 href={feature.href}
-                className="premium-glass group rounded-[1.5rem] p-6 transition hover:-translate-y-1 hover:border-[#D4AF37]/45 hover:bg-white/[0.09]"
+                className="home-feature-card premium-glass group rounded-[1.5rem] p-6 transition hover:-translate-y-1 hover:border-[#D4AF37]/45"
               >
                 <h2 className="text-2xl font-bold text-[#F8FAFC]">
                   {feature.title}

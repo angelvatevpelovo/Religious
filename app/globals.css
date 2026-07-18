@@ -33,9 +33,9 @@ html {
 
 body {
   background:
-    radial-gradient(circle at 16% 8%, rgba(212, 175, 55, 0.18), transparent 28rem),
-    radial-gradient(circle at 84% 0%, rgba(91, 141, 239, 0.18), transparent 32rem),
-    linear-gradient(180deg, #071a2f 0%, #0f2744 52%, #071a2f 100%);
+    radial-gradient(ellipse at 78% 12%, rgba(212, 175, 55, 0.12), transparent 34rem),
+    radial-gradient(ellipse at 72% 30%, rgba(92, 73, 168, 0.12), transparent 40rem),
+    linear-gradient(180deg, #030817 0%, #071426 46%, #050a15 100%);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
   min-height: 100vh;
@@ -80,6 +80,159 @@ body {
   color: transparent;
 }
 
+.home-page-shell {
+  background:
+    radial-gradient(ellipse at 80% 18%, rgba(212, 175, 55, 0.12), transparent 36rem),
+    radial-gradient(ellipse at 74% 36%, rgba(92, 73, 168, 0.12), transparent 44rem),
+    linear-gradient(180deg, #030817 0%, #071426 48%, #050a15 100%) !important;
+}
+
+.home-hero-image {
+  background-color: #030916;
+  background-image:
+    linear-gradient(90deg, rgba(2, 7, 18, 0.97) 0%, rgba(4, 10, 24, 0.9) 30%, rgba(7, 18, 40, 0.2) 55%, rgba(2, 7, 18, 0.04) 100%),
+    linear-gradient(180deg, rgba(4, 9, 22, 0.12) 0%, rgba(4, 9, 22, 0.04) 54%, rgba(3, 8, 19, 0.86) 100%),
+    radial-gradient(ellipse at 78% 56%, rgba(212, 175, 55, 0.16), transparent 28rem),
+    radial-gradient(ellipse at 74% 30%, rgba(82, 121, 220, 0.14), transparent 38rem),
+    url("/images/cosmic-sanctuary-hero.png");
+  background-position:
+    center,
+    center,
+    center right,
+    center right,
+    center right;
+  background-repeat: no-repeat;
+  background-size:
+    cover,
+    cover,
+    cover,
+    cover,
+    cover;
+}
+
+.home-hero-image::before {
+  background:
+    radial-gradient(ellipse at 79% 58%, rgba(245, 215, 110, 0.1), transparent 26rem),
+    radial-gradient(ellipse at 84% 80%, rgba(46, 85, 166, 0.1), transparent 34rem),
+    linear-gradient(180deg, transparent 66%, rgba(3, 8, 19, 0.94) 100%);
+  content: "";
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+.home-hero-image::after {
+  background:
+    radial-gradient(ellipse at 82% 72%, rgba(245, 215, 110, 0.12), transparent 18rem),
+    linear-gradient(90deg, rgba(3, 8, 19, 0.72) 0%, transparent 38%);
+  content: "";
+  inset: 0;
+  mix-blend-mode: screen;
+  opacity: 0.34;
+  pointer-events: none;
+  position: absolute;
+}
+
+.hero-image-stardust {
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.42) 0 0.65px, transparent 1px),
+    radial-gradient(circle, rgba(245, 215, 110, 0.28) 0 0.75px, transparent 1.2px),
+    radial-gradient(circle, rgba(141, 185, 255, 0.28) 0 0.8px, transparent 1.25px);
+  background-position:
+    0 0,
+    42px 58px,
+    118px 26px;
+  background-size:
+    86px 86px,
+    148px 148px,
+    238px 238px;
+  mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.65) 34%, black 100%);
+  opacity: 0.3;
+}
+
+.hero-portal-glow {
+  background:
+    radial-gradient(ellipse at 50% 50%, rgba(255, 248, 210, 0.18), rgba(245, 215, 110, 0.16) 18%, rgba(212, 175, 55, 0.08) 36%, transparent 72%),
+    linear-gradient(180deg, transparent 0%, rgba(245, 215, 110, 0.12) 44%, transparent 100%);
+  filter: blur(20px);
+  height: min(48rem, 82vh);
+  opacity: 0.32;
+  right: -8vw;
+  top: 10%;
+  width: min(48rem, 54vw);
+}
+
+.hero-bottom-vignette {
+  background:
+    linear-gradient(180deg, transparent 0%, rgba(5, 12, 28, 0.62) 46%, rgba(5, 10, 21, 0.98) 100%),
+    radial-gradient(ellipse at 76% 100%, rgba(212, 175, 55, 0.12), transparent 30rem),
+    radial-gradient(ellipse at 62% 82%, rgba(92, 73, 168, 0.1), transparent 34rem);
+  height: 18rem;
+}
+
+.hero-image-focus {
+  min-width: 0;
+}
+
+.home-cards-section {
+  isolation: isolate;
+}
+
+.home-cards-section::before {
+  background:
+    linear-gradient(180deg, rgba(5, 10, 21, 0.02) 0%, rgba(5, 10, 21, 0.52) 32%, rgba(5, 10, 21, 0.9) 100%),
+    radial-gradient(ellipse at 78% 8%, rgba(212, 175, 55, 0.13), transparent 26rem),
+    radial-gradient(ellipse at 48% 22%, rgba(91, 141, 239, 0.08), transparent 28rem),
+    radial-gradient(ellipse at 16% 60%, rgba(92, 73, 168, 0.1), transparent 34rem);
+  content: "";
+  inset: -8rem 50% -4rem 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  pointer-events: none;
+  position: absolute;
+  z-index: -2;
+}
+
+.home-cards-section::after {
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.16) 0 0.6px, transparent 1px),
+    radial-gradient(circle, rgba(245, 215, 110, 0.12) 0 0.65px, transparent 1.1px);
+  background-position:
+    0 0,
+    48px 34px;
+  background-size:
+    118px 118px,
+    186px 186px;
+  content: "";
+  inset: -6rem 50% -4rem 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  opacity: 0.28;
+  pointer-events: none;
+  position: absolute;
+  z-index: -1;
+}
+
+.home-feature-card {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.085), rgba(255, 255, 255, 0.028)),
+    rgba(5, 14, 31, 0.42);
+  border-color: rgba(255, 255, 255, 0.13);
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.075);
+}
+
+.home-feature-card:hover {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.105), rgba(255, 255, 255, 0.04)),
+    rgba(8, 20, 42, 0.52);
+  box-shadow:
+    0 26px 90px rgba(0, 0, 0, 0.38),
+    0 0 34px rgba(212, 175, 55, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.09);
+}
+
 @keyframes sacredFieldDrift {
   0%,
   100% {
@@ -98,6 +251,509 @@ body {
   50% {
     transform: rotateX(68deg) rotateZ(-12deg) translate3d(0, -0.75rem, 0);
   }
+}
+
+@keyframes nebulaDrift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(-1.4rem, 1rem, 0) scale(1.04) rotate(1.5deg);
+  }
+}
+
+@keyframes symbolsFloat {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(var(--symbol-rotate)) scale(var(--symbol-scale));
+  }
+  50% {
+    transform: translate3d(var(--symbol-drift-x), var(--symbol-drift-y), 0) rotate(calc(var(--symbol-rotate) + 3deg)) scale(var(--symbol-scale));
+  }
+}
+
+@keyframes haloPulse {
+  0%,
+  100% {
+    opacity: 0.42;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    opacity: 0.62;
+    transform: translate3d(0, -0.5rem, 0) scale(1.05);
+  }
+}
+
+@keyframes lightPlaneDrift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(var(--plane-rotate));
+  }
+  50% {
+    transform: translate3d(var(--plane-drift-x), var(--plane-drift-y), 0) rotate(calc(var(--plane-rotate) + 2deg));
+  }
+}
+
+@keyframes sanctuaryRotate {
+  0% {
+    transform: translate(-50%, -50%) rotateX(64deg) rotateZ(0deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotateX(64deg) rotateZ(360deg);
+  }
+}
+
+@keyframes sanctuaryCounterRotate {
+  0% {
+    transform: translate(-50%, -50%) rotateX(68deg) rotateZ(360deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotateX(68deg) rotateZ(0deg);
+  }
+}
+
+@keyframes sanctuaryPulse {
+  0%,
+  100% {
+    opacity: 0.72;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 0.95;
+    transform: translate(-50%, -50%) scale(1.08);
+  }
+}
+
+@keyframes sanctuaryFloat {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -0.9rem, 0);
+  }
+}
+
+.cosmic-void {
+  background:
+    radial-gradient(ellipse at 74% 42%, rgba(15, 37, 78, 0.78), transparent 36rem),
+    radial-gradient(ellipse at 88% 80%, rgba(5, 10, 28, 0.95), transparent 42rem),
+    radial-gradient(ellipse at 16% 26%, rgba(9, 23, 48, 0.82), transparent 34rem),
+    radial-gradient(ellipse at 46% 104%, rgba(3, 7, 18, 0.96), transparent 42rem),
+    linear-gradient(180deg, #020712 0%, #071a2f 34%, #061124 64%, #020712 100%);
+}
+
+.cosmic-stardust {
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.42) 0 0.7px, transparent 1px),
+    radial-gradient(circle, rgba(245, 215, 110, 0.28) 0 0.8px, transparent 1.2px),
+    radial-gradient(circle, rgba(148, 197, 255, 0.28) 0 0.9px, transparent 1.25px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.68) 0 1.35px, transparent 1.8px);
+  background-position:
+    0 0,
+    38px 54px,
+    92px 18px,
+    120px 86px;
+  background-size:
+    92px 92px,
+    142px 142px,
+    226px 226px,
+    318px 318px;
+  mask-image: radial-gradient(ellipse at 63% 42%, black 0%, black 52%, transparent 88%);
+  opacity: 0.74;
+}
+
+.cosmic-nebula-field {
+  animation: nebulaDrift 28s ease-in-out infinite;
+  background:
+    radial-gradient(ellipse at 76% 38%, rgba(212, 175, 55, 0.27), transparent 24rem),
+    radial-gradient(ellipse at 84% 68%, rgba(45, 83, 164, 0.34), transparent 38rem),
+    radial-gradient(ellipse at 66% 21%, rgba(118, 80, 176, 0.19), transparent 34rem),
+    radial-gradient(ellipse at 33% 74%, rgba(11, 23, 52, 0.66), transparent 34rem),
+    conic-gradient(from 226deg at 72% 48%, transparent 0deg, rgba(245, 215, 110, 0.16) 48deg, transparent 102deg, rgba(91, 141, 239, 0.15) 172deg, transparent 250deg);
+  filter: blur(1.4px) saturate(1.16);
+  opacity: 1;
+}
+
+.hero-luminous-halo {
+  animation: haloPulse 16s ease-in-out infinite;
+  background:
+    radial-gradient(ellipse at center, rgba(4, 9, 22, 0.78), rgba(4, 9, 22, 0.36) 32%, transparent 68%),
+    radial-gradient(ellipse at center, rgba(245, 215, 110, 0.09), transparent 72%);
+  filter: blur(14px);
+  height: 38rem;
+  left: -10rem;
+  top: 4rem;
+  width: min(62rem, 108vw);
+}
+
+.hero-readability-field {
+  background:
+    radial-gradient(ellipse at 24% 42%, rgba(3, 8, 19, 0.86), rgba(3, 8, 19, 0.52) 44%, transparent 76%),
+    linear-gradient(90deg, rgba(3, 8, 19, 0.62), transparent 82%);
+  filter: blur(8px);
+}
+
+.sacred-symbol-field {
+  filter: blur(1.7px);
+  mix-blend-mode: screen;
+}
+
+.sacred-symbol {
+  animation: symbolsFloat 30s ease-in-out infinite;
+  color: #f5d76e;
+  font-family: "Times New Roman", Georgia, serif;
+  font-weight: 400;
+  line-height: 1;
+  opacity: var(--symbol-opacity);
+  position: absolute;
+  text-shadow: 0 0 18px rgba(245, 215, 110, 0.12);
+  transform-origin: center;
+  user-select: none;
+}
+
+.sacred-symbol-one {
+  --symbol-drift-x: 0.8rem;
+  --symbol-drift-y: -0.5rem;
+  --symbol-opacity: 0.009;
+  --symbol-rotate: -12deg;
+  --symbol-scale: 1;
+  font-size: clamp(1.25rem, 2.2vw, 2.25rem);
+  left: 19%;
+  top: 15%;
+}
+
+.sacred-symbol-two {
+  --symbol-drift-x: -0.6rem;
+  --symbol-drift-y: 0.7rem;
+  --symbol-opacity: 0.008;
+  --symbol-rotate: 9deg;
+  --symbol-scale: 1;
+  animation-delay: -5s;
+  font-size: clamp(1.2rem, 2.1vw, 2.15rem);
+  right: 22%;
+  top: 17%;
+}
+
+.sacred-symbol-three {
+  --symbol-drift-x: 0.7rem;
+  --symbol-drift-y: 0.6rem;
+  --symbol-opacity: 0.007;
+  --symbol-rotate: 16deg;
+  --symbol-scale: 1;
+  animation-delay: -11s;
+  font-size: clamp(1.15rem, 2vw, 2rem);
+  right: 35%;
+  top: 37%;
+}
+
+.sacred-symbol-four {
+  --symbol-drift-x: -0.5rem;
+  --symbol-drift-y: -0.75rem;
+  --symbol-opacity: 0.01;
+  --symbol-rotate: -8deg;
+  --symbol-scale: 1;
+  animation-delay: -16s;
+  font-size: clamp(1.25rem, 2.2vw, 2.25rem);
+  left: 50%;
+  top: 24%;
+}
+
+.sacred-symbol-five {
+  --symbol-drift-x: 0.55rem;
+  --symbol-drift-y: 0.8rem;
+  --symbol-opacity: 0.007;
+  --symbol-rotate: 10deg;
+  --symbol-scale: 1;
+  animation-delay: -21s;
+  font-size: clamp(1.2rem, 2.1vw, 2.1rem);
+  left: 16%;
+  top: 67%;
+}
+
+.sacred-symbol-six {
+  --symbol-drift-x: -0.8rem;
+  --symbol-drift-y: -0.45rem;
+  --symbol-opacity: 0.009;
+  --symbol-rotate: -18deg;
+  --symbol-scale: 1;
+  animation-delay: -9s;
+  font-size: clamp(1.2rem, 2vw, 2.05rem);
+  right: 15%;
+  top: 69%;
+}
+
+.sacred-symbol-seven {
+  --symbol-drift-x: 0.7rem;
+  --symbol-drift-y: -0.6rem;
+  --symbol-opacity: 0.006;
+  --symbol-rotate: 12deg;
+  --symbol-scale: 1;
+  animation-delay: -25s;
+  font-size: clamp(1.1rem, 1.9vw, 1.95rem);
+  left: 64%;
+  top: 81%;
+}
+
+.sacred-symbol-eight {
+  --symbol-drift-x: -0.65rem;
+  --symbol-drift-y: 0.55rem;
+  --symbol-opacity: 0.007;
+  --symbol-rotate: -7deg;
+  --symbol-scale: 1;
+  animation-delay: -18s;
+  font-size: clamp(1.15rem, 2vw, 2rem);
+  left: 31%;
+  top: 86%;
+}
+
+.foreground-light-plane {
+  animation: lightPlaneDrift 24s ease-in-out infinite;
+  background:
+    linear-gradient(115deg, transparent 16%, rgba(245, 215, 110, 0.13), transparent 48%),
+    linear-gradient(245deg, transparent 28%, rgba(91, 141, 239, 0.12), transparent 58%);
+  border-radius: 9999px;
+  filter: blur(22px);
+  height: 20rem;
+  opacity: 0.44;
+  position: absolute;
+  width: 38rem;
+}
+
+.foreground-light-plane-one {
+  --plane-drift-x: 1.2rem;
+  --plane-drift-y: -0.7rem;
+  --plane-rotate: -18deg;
+  right: -12rem;
+  top: 30rem;
+}
+
+.foreground-light-plane-two {
+  --plane-drift-x: -0.9rem;
+  --plane-drift-y: 0.9rem;
+  --plane-rotate: 16deg;
+  animation-delay: -12s;
+  bottom: 3rem;
+  left: -14rem;
+  opacity: 0.32;
+}
+
+.cosmic-sanctuary {
+  animation: sanctuaryFloat 18s ease-in-out infinite;
+  isolation: isolate;
+  perspective: 1300px;
+  width: 100%;
+}
+
+.sanctuary-ambient {
+  background:
+    radial-gradient(ellipse at 50% 43%, rgba(245, 215, 110, 0.24), transparent 27%),
+    radial-gradient(ellipse at 52% 58%, rgba(91, 141, 239, 0.24), transparent 43%),
+    radial-gradient(ellipse at 54% 78%, rgba(118, 80, 176, 0.14), transparent 56%),
+    radial-gradient(ellipse at 50% 74%, rgba(3, 8, 20, 0.68), transparent 68%);
+  filter: blur(4px);
+  inset: -8%;
+  position: absolute;
+}
+
+.sanctuary-beam {
+  background:
+    linear-gradient(90deg, transparent, rgba(245, 215, 110, 0.11), rgba(255, 255, 255, 0.18), rgba(245, 215, 110, 0.11), transparent),
+    linear-gradient(180deg, transparent 0%, rgba(245, 215, 110, 0.16) 42%, rgba(245, 215, 110, 0.05) 68%, transparent 100%);
+  filter: blur(14px);
+  height: 96%;
+  left: 50%;
+  opacity: 0.86;
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  width: 28%;
+}
+
+.sanctuary-ring {
+  border: 1px solid rgba(245, 215, 110, 0.18);
+  border-radius: 9999px;
+  box-shadow:
+    0 0 42px rgba(212, 175, 55, 0.11),
+    inset 0 0 34px rgba(245, 215, 110, 0.06);
+  left: 50%;
+  position: absolute;
+  top: 45%;
+  transform-style: preserve-3d;
+}
+
+.sanctuary-ring::before,
+.sanctuary-ring::after {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: inherit;
+  content: "";
+  inset: 11%;
+  position: absolute;
+}
+
+.sanctuary-ring::after {
+  border-color: rgba(245, 215, 110, 0.12);
+  inset: 24%;
+}
+
+.sanctuary-ring-outer {
+  animation: sanctuaryRotate 72s linear infinite;
+  height: min(43rem, 86vh);
+  opacity: 0.86;
+  width: min(43rem, 86vh);
+}
+
+.sanctuary-ring-middle {
+  animation: sanctuaryCounterRotate 58s linear infinite;
+  border-color: rgba(141, 185, 255, 0.16);
+  height: min(33rem, 68vh);
+  opacity: 0.88;
+  width: min(33rem, 68vh);
+}
+
+.sanctuary-ring-inner {
+  animation: sanctuaryRotate 46s linear infinite;
+  border-color: rgba(245, 215, 110, 0.26);
+  height: min(22rem, 48vh);
+  opacity: 0.94;
+  width: min(22rem, 48vh);
+}
+
+.sanctuary-flower {
+  height: min(25rem, 52vh);
+  left: 50%;
+  opacity: 0.42;
+  position: absolute;
+  top: 45%;
+  transform: translate(-50%, -50%) rotateX(66deg);
+  transform-style: preserve-3d;
+  width: min(25rem, 52vh);
+}
+
+.sanctuary-flower span {
+  border: 1px solid rgba(245, 215, 110, 0.18);
+  border-radius: 9999px;
+  height: 100%;
+  left: 0;
+  position: absolute;
+  top: 0;
+  transform: rotate(calc(var(--petal) * 30deg));
+  width: 100%;
+}
+
+.sanctuary-flower span:nth-child(1) {
+  --petal: 0;
+}
+
+.sanctuary-flower span:nth-child(2) {
+  --petal: 1;
+}
+
+.sanctuary-flower span:nth-child(3) {
+  --petal: 2;
+}
+
+.sanctuary-flower span:nth-child(4) {
+  --petal: 3;
+}
+
+.sanctuary-flower span:nth-child(5) {
+  --petal: 4;
+}
+
+.sanctuary-flower span:nth-child(6) {
+  --petal: 5;
+}
+
+.sanctuary-core {
+  animation: sanctuaryPulse 9s ease-in-out infinite;
+  background:
+    radial-gradient(circle, #fff8d2 0%, #f5d76e 14%, rgba(212, 175, 55, 0.46) 34%, rgba(212, 175, 55, 0.08) 58%, transparent 72%);
+  border-radius: 9999px;
+  filter: blur(0.4px);
+  height: min(14rem, 30vh);
+  left: 50%;
+  position: absolute;
+  top: 45%;
+  width: min(14rem, 30vh);
+}
+
+.sanctuary-orbit {
+  background: #f5d76e;
+  border-radius: 9999px;
+  box-shadow: 0 0 22px rgba(245, 215, 110, 0.55);
+  height: 0.45rem;
+  position: absolute;
+  width: 0.45rem;
+}
+
+.sanctuary-orbit-one {
+  left: 24%;
+  top: 39%;
+}
+
+.sanctuary-orbit-two {
+  opacity: 0.7;
+  right: 22%;
+  top: 55%;
+}
+
+.sanctuary-orbit-three {
+  bottom: 28%;
+  left: 54%;
+  opacity: 0.55;
+}
+
+.sanctuary-horizon {
+  background:
+    radial-gradient(ellipse at 50% 50%, rgba(255, 248, 210, 0.22), rgba(245, 215, 110, 0.22) 24%, rgba(212, 175, 55, 0.09) 48%, transparent 76%),
+    linear-gradient(90deg, transparent, rgba(245, 215, 110, 0.48), transparent);
+  bottom: 4%;
+  filter: blur(14px);
+  height: 10rem;
+  left: 0;
+  opacity: 0.92;
+  position: absolute;
+  width: 100%;
+}
+
+.sanctuary-particles {
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.32) 0 1px, transparent 1.25px),
+    radial-gradient(circle, rgba(245, 215, 110, 0.28) 0 1px, transparent 1.3px);
+  background-position:
+    12px 18px,
+    48px 36px;
+  background-size:
+    76px 76px,
+    118px 118px;
+  inset: 2%;
+  mask-image: radial-gradient(circle at center, black 0%, transparent 72%);
+  opacity: 0.56;
+  position: absolute;
+}
+
+.sanctuary-mist {
+  border-radius: 9999px;
+  filter: blur(30px);
+  position: absolute;
+}
+
+.sanctuary-mist-one {
+  background: rgba(91, 141, 239, 0.18);
+  bottom: 8%;
+  height: 16rem;
+  right: 4%;
+  width: 28rem;
+}
+
+.sanctuary-mist-two {
+  background: rgba(212, 175, 55, 0.13);
+  bottom: 18%;
+  height: 12rem;
+  left: 12%;
+  width: 22rem;
 }
 
 .sacred-depth-field {
@@ -188,9 +844,92 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .cosmic-nebula-field,
+  .foreground-light-plane,
+  .cosmic-sanctuary,
+  .sanctuary-core,
+  .sanctuary-ring-inner,
+  .sanctuary-ring-middle,
+  .sanctuary-ring-outer,
   .sacred-depth-field,
-  .sacred-ring {
+  .sacred-ring,
+  .sacred-symbol,
+  .hero-luminous-halo {
     animation: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .sacred-symbol {
+    opacity: calc(var(--symbol-opacity) * 0.16);
+  }
+
+  .sacred-symbol-two,
+  .sacred-symbol-four,
+  .sacred-symbol-six,
+  .sacred-symbol-eight {
+    display: none;
+  }
+
+  .home-hero-image {
+    background-image:
+      linear-gradient(180deg, rgba(2, 7, 18, 0.95) 0%, rgba(4, 10, 24, 0.82) 42%, rgba(3, 8, 19, 0.94) 100%),
+      radial-gradient(ellipse at 54% 18%, rgba(212, 175, 55, 0.1), transparent 19rem),
+      url("/images/cosmic-sanctuary-hero.png");
+    background-position:
+      center,
+      center top,
+      center top;
+  }
+
+  .hero-image-stardust {
+    opacity: 0.18;
+  }
+
+  .hero-portal-glow {
+    opacity: 0.18;
+    right: -28vw;
+    top: 5%;
+    width: 88vw;
+  }
+
+  .cosmic-sanctuary {
+    margin-top: -1.5rem;
+  }
+
+  .sanctuary-beam {
+    opacity: 0.48;
+  }
+
+  .sanctuary-ring-outer {
+    opacity: 0.58;
+  }
+
+  .sanctuary-ring-outer {
+    height: 26rem;
+    width: 26rem;
+  }
+
+  .sanctuary-ring-middle {
+    height: 20rem;
+    width: 20rem;
+  }
+
+  .sanctuary-ring-inner,
+  .sanctuary-flower {
+    height: 14rem;
+    width: 14rem;
+  }
+
+  .sanctuary-core {
+    height: 8rem;
+    width: 8rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .cosmic-sanctuary {
+    width: min(56vw, 58rem);
   }
 }
 
