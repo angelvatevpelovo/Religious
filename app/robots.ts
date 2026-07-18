@@ -6,7 +6,17 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: "*",
-      allow: ["/", "/search", "/book", "/temples", "/ai", "/reminders"],
+      allow: [
+        "/",
+        "/search",
+        "/book",
+        "/temples",
+        "/ai",
+        "/reminders",
+        "/about",
+        "/privacy",
+        "/terms",
+      ],
       disallow: ["/favorites", "/ai-history", "/profile"],
     },
     sitemap: `${baseUrl}/sitemap.xml`,

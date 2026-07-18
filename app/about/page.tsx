@@ -18,8 +18,9 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <PageShell>
+    <PageShell className="user-page-shell">
       <HeroPanel
+        className="user-glass-panel"
         eyebrow="About RELIGIOUS"
         title="A respectful place to explore faith, prayer and sacred text"
         description="RELIGIOUS brings together scripture search, prayers, sacred places and reflective AI guidance in one calm multi-faith resource."
@@ -34,21 +35,25 @@ export default function AboutPage() {
 
         <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
           <FeatureCard
+            className="user-glass-panel"
             eyebrow="Sacred text"
             title="Bible search"
             description="Search and read biblical passages with a quiet interface designed for focused study."
           />
           <FeatureCard
+            className="user-glass-panel"
             eyebrow="Prayer"
             title="Prayers"
             description="Browse prayer resources and return to meaningful reflections when you need them."
           />
           <FeatureCard
+            className="user-glass-panel"
             eyebrow="Places"
             title="Temples map"
             description="Explore temples and sacred places with cards, filters and an interactive map."
           />
           <FeatureCard
+            className="user-glass-panel"
             eyebrow="Reflection"
             title="AI assistant"
             description="Ask religious or spiritual questions and receive informational, reflective guidance."
@@ -57,7 +62,7 @@ export default function AboutPage() {
       </section>
 
       <section className="mt-16">
-        <GlassCard className="p-6 sm:p-8">
+        <GlassCard className="user-glass-panel p-6 sm:p-8">
           <h2 className="text-3xl font-bold text-[#F8FAFC]">
             A multi-faith resource
           </h2>

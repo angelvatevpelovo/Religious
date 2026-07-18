@@ -40,8 +40,9 @@ const terms = [
 
 export default function TermsPage() {
   return (
-    <PageShell>
+    <PageShell className="user-page-shell">
       <HeroPanel
+        className="user-glass-panel"
         eyebrow="Terms"
         title="Use RELIGIOUS with care and discernment"
         description="These basic terms describe how to understand the information, AI responses and public location data in RELIGIOUS."
@@ -56,7 +57,7 @@ export default function TermsPage() {
 
         <div className="mt-8 grid gap-5">
           {terms.map((item) => (
-            <GlassCard key={item.title} className="p-6 sm:p-8">
+            <GlassCard key={item.title} className="user-glass-panel p-6 sm:p-8">
               <h2 className="text-2xl font-bold text-[#F8FAFC]">
                 {item.title}
               </h2>

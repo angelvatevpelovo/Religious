@@ -44,8 +44,9 @@ const privacyItems = [
 
 export default function PrivacyPage() {
   return (
-    <PageShell>
+    <PageShell className="user-page-shell">
       <HeroPanel
+        className="user-glass-panel"
         eyebrow="Privacy"
         title="Privacy basics for RELIGIOUS"
         description="This page explains the basic privacy expectations for the first public version of RELIGIOUS."
@@ -60,7 +61,7 @@ export default function PrivacyPage() {
 
         <div className="mt-8 grid gap-5 md:grid-cols-2">
           {privacyItems.map((item) => (
-            <GlassCard key={item.title} className="p-6">
+            <GlassCard key={item.title} className="user-glass-panel p-6">
               <h2 className="text-2xl font-bold text-[#F8FAFC]">
                 {item.title}
               </h2>
