@@ -96,17 +96,32 @@ function TempleCard({ temple }: { temple: TempleWithDistance }) {
   const navigationUrl = googleMapsUrl(temple);
 
   return (
-    <article className="rounded-2xl border border-white/10 bg-white/5 p-5 transition hover:bg-white/10">
+    <article className="group overflow-hidden rounded-[1.5rem] border border-white/12 bg-[#061326]/58 p-5 shadow-2xl shadow-black/24 backdrop-blur-2xl transition hover:-translate-y-1 hover:border-[#D4AF37]/50 hover:bg-[#08182D]/68">
       <Link href={`/temple/${temple.id}`}>
-        <h2 className="text-xl font-bold text-[#D4AF37]">
+        {temple.image_url && (
+          <div
+            className="mb-5 h-44 rounded-[1.25rem] border border-white/10 bg-cover bg-center"
+            style={{ backgroundImage: `url(${temple.image_url})` }}
+            aria-hidden="true"
+          />
+        )}
+
+        <div className="flex flex-wrap gap-2">
+          <span className="rounded-full border border-[#D4AF37]/35 bg-[#D4AF37]/10 px-3 py-1 text-xs font-bold text-[#F5D76E]">
+            {temple.religion || "Sacred place"}
+          </span>
+          {temple.denomination && (
+            <span className="rounded-full border border-white/12 bg-white/[0.06] px-3 py-1 text-xs font-bold text-[#CBD5E1]">
+              {temple.denomination}
+            </span>
+          )}
+        </div>
+
+        <h2 className="mt-4 text-2xl font-black leading-tight text-[#F8FAFC]">
           {temple.name ?? "Unnamed temple"}
         </h2>
 
-        <p className="mt-2 text-white/70">
-          {temple.religion || "Religious place"}
-        </p>
-
-        <p className="mt-2 text-sm text-white/60">
+        <p className="mt-3 text-sm font-semibold text-[#AFC0D4]">
           {[temple.city, temple.country].filter(Boolean).join(", ") ||
             "Location not available"}
         </p>
@@ -118,14 +133,22 @@ function TempleCard({ temple }: { temple: TempleWithDistance }) {
         )}
 
         {temple.address && (
-          <p className="mt-2 text-sm text-white/50">{temple.address}</p>
+          <p className="mt-3 line-clamp-2 text-sm leading-6 text-[#CBD5E1]">
+            {temple.address}
+          </p>
+        )}
+
+        {temple.description && (
+          <p className="mt-4 line-clamp-3 text-sm leading-6 text-[#AFC0D4]">
+            {temple.description}
+          </p>
         )}
       </Link>
 
       <div className="mt-5 flex flex-wrap gap-3">
         <Link
           href={`/temple/${temple.id}`}
-          className="rounded-xl bg-[#D4AF37] px-4 py-2 text-sm font-bold text-[#0F2744] transition hover:bg-[#F5D76E]"
+          className="rounded-2xl bg-[#D4AF37] px-4 py-2 text-sm font-black text-[#071A2F] transition hover:bg-[#F5D76E]"
         >
           View Details
         </Link>
@@ -135,7 +158,7 @@ function TempleCard({ temple }: { temple: TempleWithDistance }) {
             href={navigationUrl}
             target="_blank"
             rel="noreferrer"
-            className="rounded-xl border border-[#D4AF37]/40 px-4 py-2 text-sm font-bold text-[#F5D76E] transition hover:bg-white/10"
+            className="rounded-2xl border border-[#D4AF37]/40 px-4 py-2 text-sm font-bold text-[#F5D76E] transition hover:bg-white/10"
           >
             Navigate
           </a>
@@ -294,22 +317,22 @@ export default function TemplesExplorerClient({
 
   return (
     <section className="mt-8">
-      <div className="rounded-2xl border border-[#D4AF37]/25 bg-white/5 p-5 shadow-2xl shadow-black/10">
+      <div className="rounded-[1.5rem] border border-white/12 bg-white/[0.045] p-5 shadow-2xl shadow-black/20 backdrop-blur-2xl">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-[#D4AF37]">Explore temples</h2>
-            <p className="mt-2 text-sm text-white/70">
+            <h2 className="text-2xl font-black text-[#F8FAFC]">Explore sacred places</h2>
+            <p className="mt-2 text-sm text-[#AFC0D4]">
               Filter the loaded sacred places. The cards and map update together.
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:justify-end">
-            <div className="rounded-2xl border border-white/10 bg-[#0F2744]/80 px-4 py-3">
-              <p className="text-xs font-bold uppercase text-white/50">Total loaded</p>
+            <div className="rounded-2xl border border-white/10 bg-[#030817]/62 px-4 py-3">
+              <p className="text-xs font-bold uppercase text-[#7890AA]">Total loaded</p>
               <p className="mt-1 text-2xl font-bold text-[#D4AF37]">{temples.length}</p>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-[#0F2744]/80 px-4 py-3">
-              <p className="text-xs font-bold uppercase text-white/50">Showing filtered</p>
+            <div className="rounded-2xl border border-white/10 bg-[#030817]/62 px-4 py-3">
+              <p className="text-xs font-bold uppercase text-[#7890AA]">Showing filtered</p>
               <p className="mt-1 text-2xl font-bold text-[#D4AF37]">{visibleTemples.length}</p>
             </div>
           </div>
@@ -323,7 +346,7 @@ export default function TemplesExplorerClient({
               value={search}
               onChange={(event) => updateFilter(() => setSearch(event.target.value))}
               placeholder="Search by name, city, religion..."
-              className="min-h-12 w-full rounded-xl border border-[#D4AF37]/35 bg-[#071A2F] px-4 py-3 text-base text-white outline-none transition placeholder:text-white/40 focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20"
+              className="min-h-12 w-full rounded-2xl border border-white/12 bg-[#030817]/72 px-4 py-3 text-base text-[#F8FAFC] outline-none transition placeholder:text-[#7890AA] focus:border-[#D4AF37]/70"
             />
           </label>
 
@@ -333,7 +356,7 @@ export default function TemplesExplorerClient({
               id="temple-religion-filter"
               value={selectedReligion}
               onChange={(event) => updateFilter(() => setSelectedReligion(event.target.value))}
-              className="min-h-12 w-full rounded-xl border border-[#D4AF37]/35 bg-[#071A2F] px-4 py-3 text-base text-white outline-none transition focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20"
+              className="min-h-12 w-full rounded-2xl border border-white/12 bg-[#030817]/72 px-4 py-3 text-base text-[#F8FAFC] outline-none transition focus:border-[#D4AF37]/70"
             >
               <option value="All">All religions</option>
               {religionOptions.map((religion) => (
@@ -355,7 +378,7 @@ export default function TemplesExplorerClient({
                   setSelectedCity("All");
                 })
               }
-              className="min-h-12 w-full rounded-xl border border-[#D4AF37]/35 bg-[#071A2F] px-4 py-3 text-base text-white outline-none transition focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20"
+              className="min-h-12 w-full rounded-2xl border border-white/12 bg-[#030817]/72 px-4 py-3 text-base text-[#F8FAFC] outline-none transition focus:border-[#D4AF37]/70"
             >
               <option value="All">All countries</option>
               {countryOptions.map((country) => (
@@ -372,7 +395,7 @@ export default function TemplesExplorerClient({
               id="temple-city-filter"
               value={selectedCity}
               onChange={(event) => updateFilter(() => setSelectedCity(event.target.value))}
-              className="min-h-12 w-full rounded-xl border border-[#D4AF37]/35 bg-[#071A2F] px-4 py-3 text-base text-white outline-none transition focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20"
+              className="min-h-12 w-full rounded-2xl border border-white/12 bg-[#030817]/72 px-4 py-3 text-base text-[#F8FAFC] outline-none transition focus:border-[#D4AF37]/70"
             >
               <option value="All">All cities</option>
               {cityOptions.map((city) => (
@@ -387,20 +410,20 @@ export default function TemplesExplorerClient({
             type="button"
             onClick={resetFilters}
             disabled={!hasActiveFilters}
-            className="min-h-12 rounded-xl border border-[#D4AF37]/40 px-5 py-3 font-bold text-[#F5D76E] transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-45 md:col-span-2 xl:col-span-1"
+            className="min-h-12 rounded-2xl border border-[#D4AF37]/40 px-5 py-3 font-bold text-[#F5D76E] transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-45 md:col-span-2 xl:col-span-1"
           >
             Reset filters
           </button>
         </div>
       </div>
 
-      <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-5">
+      <div className="mt-6 rounded-[1.5rem] border border-white/12 bg-white/[0.045] p-5 shadow-2xl shadow-black/20 backdrop-blur-2xl">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-[#D4AF37]">
+            <h2 className="text-2xl font-black text-[#F8FAFC]">
               Temples near me
             </h2>
-            <p className="mt-2 text-sm text-white/70">
+            <p className="mt-2 text-sm text-[#AFC0D4]">
               Use your browser location to sort nearby sacred places first.
             </p>
           </div>
@@ -410,7 +433,7 @@ export default function TemplesExplorerClient({
               type="button"
               onClick={findNearbyTemples}
               disabled={locating}
-              className="rounded-xl bg-[#D4AF37] px-5 py-3 font-bold text-[#0F2744] transition hover:bg-[#F5D76E] disabled:opacity-60"
+              className="rounded-2xl bg-[#D4AF37] px-5 py-3 font-black text-[#071A2F] transition hover:bg-[#F5D76E] disabled:opacity-60"
             >
               {locating ? "Finding location..." : "Temples near me"}
             </button>
@@ -422,7 +445,7 @@ export default function TemplesExplorerClient({
                   setNearMeEnabled(false);
                   setPage(1);
                 }}
-                className="rounded-xl border border-white/20 px-5 py-3 font-bold text-[#F5D76E] transition hover:bg-white/10"
+                className="rounded-2xl border border-white/20 px-5 py-3 font-bold text-[#F5D76E] transition hover:bg-white/10"
               >
                 Clear nearby
               </button>
@@ -470,8 +493,19 @@ export default function TemplesExplorerClient({
       </div>
 
       {visibleTemples.length === 0 ? (
-        <div className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-8 text-center text-white/70">
-          No temples match the current filters.
+        <div className="mt-8 rounded-[1.5rem] border border-white/12 bg-white/[0.045] p-8 text-center text-[#CBD5E1] shadow-2xl shadow-black/20 backdrop-blur-2xl">
+          <h2 className="text-2xl font-bold text-[#F8FAFC]">
+            No sacred places match your filters.
+          </h2>
+          {hasActiveFilters && (
+            <button
+              type="button"
+              onClick={resetFilters}
+              className="mt-5 rounded-2xl bg-[#D4AF37] px-5 py-3 text-sm font-black text-[#071A2F] transition hover:bg-[#F5D76E]"
+            >
+              Reset filters
+            </button>
+          )}
         </div>
       ) : (
         <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -486,7 +520,7 @@ export default function TemplesExplorerClient({
           <button
             type="button"
             onClick={() => setPage((value) => Math.max(1, value - 1))}
-            className="rounded-xl border border-white/20 px-5 py-3 font-bold"
+            className="rounded-2xl border border-white/20 px-5 py-3 font-bold text-[#F5D76E] transition hover:bg-white/10"
           >
             Previous
           </button>
@@ -498,7 +532,7 @@ export default function TemplesExplorerClient({
           <button
             type="button"
             onClick={() => setPage((value) => Math.min(totalPages, value + 1))}
-            className="rounded-xl bg-[#D4AF37] px-5 py-3 font-bold text-[#0F2744]"
+            className="rounded-2xl bg-[#D4AF37] px-5 py-3 font-black text-[#071A2F] transition hover:bg-[#F5D76E]"
           >
             Next
           </button>

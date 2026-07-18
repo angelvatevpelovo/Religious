@@ -163,10 +163,13 @@ export default function TempleMap({ temples }: { temples: TempleMapTemple[] }) {
   );
 
   return (
-    <section className="overflow-hidden rounded-[2rem] border border-[#D4AF37]/35 bg-white/10 shadow-2xl shadow-black/20">
+    <section className="overflow-hidden rounded-[2rem] border border-[#D4AF37]/25 bg-white/[0.045] shadow-2xl shadow-black/25 backdrop-blur-2xl">
       <div className="border-b border-white/10 px-5 py-4">
-        <h2 className="text-2xl font-bold text-[#D4AF37]">World Map</h2>
-        <p className="mt-1 text-sm text-white/65">
+        <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#F5D76E]">
+          Interactive map
+        </p>
+        <h2 className="mt-2 text-2xl font-black text-[#F8FAFC]">World Map</h2>
+        <p className="mt-1 text-sm text-[#AFC0D4]">
           Showing {validTemples.length} sacred places with coordinates.
         </p>
       </div>
@@ -175,7 +178,7 @@ export default function TempleMap({ temples }: { temples: TempleMapTemple[] }) {
         center={[20, 0]}
         zoom={2}
         scrollWheelZoom
-        className="h-[360px] w-full sm:h-[460px] lg:h-[560px]"
+        className="h-[380px] w-full sm:h-[480px] lg:h-[620px]"
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
