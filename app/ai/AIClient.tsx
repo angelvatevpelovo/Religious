@@ -2,7 +2,8 @@
 
 import type { FormEvent, ReactNode } from "react";
 import { useMemo, useState } from "react";
-import { BackLink, GlassCard } from "../../components/DesignSystem";
+import Link from "next/link";
+import { BackLink } from "../../components/DesignSystem";
 import { supabase } from "../../lib/supabase";
 import type { AIChatMessage, AIChatRole } from "../../lib/ai/types";
 
@@ -11,12 +12,13 @@ type ChatMessage = AIChatMessage & {
 };
 
 const disclaimer =
-  "This assistant provides informational and reflective guidance. It is not a replacement for clergy, spiritual leaders, medical, legal, or mental health professionals.";
+  "This guide is for reflection and education. It is not a replacement for religious leaders, professional counseling, medical advice, or emergency help.";
 
 const suggestedQuestions = [
-  "How can I create a calm evening prayer routine?",
-  "What do different religions teach about gratitude?",
-  "Can you suggest a reflective question for today?",
+  "Explain this passage simply",
+  "Compare two traditions respectfully",
+  "Help me reflect on forgiveness",
+  "Suggest a prayer theme",
 ];
 
 function createMessage(role: AIChatRole, content: string): ChatMessage {
@@ -191,8 +193,8 @@ export default function AIClient() {
     <section className="mt-8">
       <BackLink>Back Home</BackLink>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
-        <GlassCard className="p-5 sm:p-6">
+      <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="rounded-[2rem] border border-white/12 bg-white/[0.045] p-5 shadow-2xl shadow-black/24 backdrop-blur-2xl sm:p-6">
           <form onSubmit={submitQuestion}>
             <label htmlFor="ai-question" className="text-sm font-bold uppercase tracking-[0.18em] text-[#F5D76E]">
               Your question
@@ -201,25 +203,32 @@ export default function AIClient() {
               id="ai-question"
               value={question}
               onChange={(event) => setQuestion(event.target.value)}
-              placeholder="Ask a religious or spiritual question..."
+              placeholder="Ask about a sacred text, tradition, prayer practice, or reflective question..."
               rows={7}
-              className="mt-3 w-full resize-none rounded-2xl border border-[#D4AF37]/35 bg-[#071A2F]/85 px-5 py-4 text-base leading-7 text-[#F8FAFC] outline-none transition placeholder:text-[#CBD5E1]/55 focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20"
+              className="mt-3 w-full resize-none rounded-[1.5rem] border border-white/12 bg-[#030817]/72 px-5 py-4 text-base leading-7 text-[#F8FAFC] outline-none transition placeholder:text-[#7890AA] focus:border-[#D4AF37]/70"
             />
 
             <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-sm leading-6 text-[#CBD5E1]">{disclaimer}</p>
+              <p className="max-w-2xl text-sm leading-6 text-[#AFC0D4]">
+                {disclaimer}
+              </p>
               <button
                 type="submit"
                 disabled={loading || !question.trim()}
-                className="min-h-12 rounded-2xl bg-[#D4AF37] px-6 py-3 text-sm font-bold text-[#071A2F] transition hover:bg-[#F5D76E] disabled:cursor-not-allowed disabled:opacity-50"
+                className="min-h-12 rounded-2xl bg-[#D4AF37] px-6 py-3 text-sm font-black text-[#071A2F] transition hover:bg-[#F5D76E] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {loading ? "Thinking..." : "Ask"}
               </button>
             </div>
           </form>
 
-          <div className="mt-6 rounded-2xl border border-white/10 bg-[#0F2744]/70 p-5" aria-live="polite">
-            <h2 className="text-2xl font-bold text-[#D4AF37]">Answer</h2>
+          <div className="mt-6 rounded-[1.5rem] border border-white/12 bg-[#030817]/58 p-5 shadow-xl shadow-black/20" aria-live="polite">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h2 className="text-2xl font-black text-[#F8FAFC]">Answer</h2>
+              <span className="rounded-full border border-[#D4AF37]/30 bg-[#D4AF37]/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-[#F5D76E]">
+                Reflective
+              </span>
+            </div>
 
             {loading && <p className="mt-4 text-[#CBD5E1]">Preparing a thoughtful answer...</p>}
 
@@ -237,15 +246,15 @@ export default function AIClient() {
 
             {!loading && !error && !answer && (
               <p className="mt-4 text-[#CBD5E1]">
-                Ask a question to receive an informational and reflective response.
+                Ask a question to begin your reflection.
               </p>
             )}
           </div>
-        </GlassCard>
+        </div>
 
         <aside className="space-y-5">
-          <GlassCard className="p-5">
-            <h2 className="text-xl font-bold text-[#F8FAFC]">Try asking</h2>
+          <div className="rounded-[2rem] border border-white/12 bg-white/[0.045] p-5 shadow-2xl shadow-black/20 backdrop-blur-2xl">
+            <h2 className="text-xl font-black text-[#F8FAFC]">Try asking</h2>
             <div className="mt-4 grid gap-3">
               {suggestedQuestions.map((prompt) => (
                 <button
@@ -253,26 +262,26 @@ export default function AIClient() {
                   type="button"
                   onClick={() => askAssistant(prompt)}
                   disabled={loading}
-                  className="rounded-2xl border border-white/12 bg-white/[0.06] px-4 py-3 text-left text-sm leading-6 text-[#CBD5E1] transition hover:border-[#D4AF37]/60 hover:bg-white/10 hover:text-[#F8FAFC] disabled:opacity-50"
+                  className="rounded-2xl border border-white/12 bg-[#030817]/50 px-4 py-3 text-left text-sm leading-6 text-[#CBD5E1] transition hover:border-[#D4AF37]/60 hover:bg-white/[0.07] hover:text-[#F8FAFC] disabled:opacity-50"
                 >
                   {prompt}
                 </button>
               ))}
             </div>
-          </GlassCard>
+          </div>
 
-          <GlassCard className="p-5">
-            <h2 className="text-xl font-bold text-[#F8FAFC]">MVP guide</h2>
+          <div className="rounded-[2rem] border border-white/12 bg-white/[0.045] p-5 shadow-2xl shadow-black/20 backdrop-blur-2xl">
+            <h2 className="text-xl font-black text-[#F8FAFC]">Private history</h2>
             <p className="mt-3 text-sm leading-6 text-[#CBD5E1]">
               This version works without login. If you are logged in, your questions and answers are saved to your private history.
             </p>
-            <a
+            <Link
               href="/ai-history"
               className="mt-4 inline-flex rounded-2xl border border-[#D4AF37]/40 bg-[#D4AF37]/10 px-4 py-3 text-sm font-bold text-[#F5D76E] transition hover:bg-[#D4AF37]/20"
             >
               View AI history
-            </a>
-          </GlassCard>
+            </Link>
+          </div>
         </aside>
       </div>
     </section>
