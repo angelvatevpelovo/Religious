@@ -261,6 +261,43 @@ body {
   opacity: 0.42;
 }
 
+.reader-shell {
+  background:
+    radial-gradient(ellipse at 80% 8%, rgba(212, 175, 55, 0.08), transparent 28rem),
+    radial-gradient(ellipse at 12% 34%, rgba(91, 141, 239, 0.08), transparent 32rem),
+    linear-gradient(180deg, #030817 0%, #071426 45%, #050a15 100%) !important;
+}
+
+.reader-atmosphere {
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.12) 0 0.6px, transparent 1px),
+    radial-gradient(circle, rgba(245, 215, 110, 0.08) 0 0.65px, transparent 1.1px);
+  background-position:
+    0 0,
+    54px 38px;
+  background-size:
+    132px 132px,
+    212px 212px;
+  mask-image: radial-gradient(ellipse at 50% 18%, black 0%, black 42%, transparent 82%);
+  opacity: 0.34;
+}
+
+.reader-hero {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.025)),
+    rgba(6, 19, 38, 0.74);
+}
+
+.reader-panel {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.058), rgba(255, 255, 255, 0.022)),
+    rgba(5, 14, 31, 0.76);
+}
+
+.reader-passage {
+  scroll-margin-top: 6rem;
+}
+
 @keyframes sacredFieldDrift {
   0%,
   100% {
