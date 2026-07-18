@@ -1,25 +1,96 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { usePathname } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import AuthButton from "./AuthButton";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { useLocale } from "../lib/useLocale";
 
+type MenuLink = {
+  href: string;
+  label: string;
+};
+
+function isActivePath(pathname: string, href: string) {
+  if (href === "/") return pathname === "/";
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+function navLinkClass(active: boolean) {
+  return `hidden rounded-2xl border px-3 py-2 text-sm font-semibold transition sm:inline-flex ${
+    active
+      ? "border-[#D4AF37]/45 bg-[#D4AF37]/10 text-[#F5D76E] shadow-lg shadow-[#D4AF37]/10"
+      : "border-transparent text-[#CBD5E1] hover:border-[#D4AF37]/50 hover:bg-white/[0.06] hover:text-[#F5D76E]"
+  }`;
+}
+
+function menuLinkClass(active: boolean) {
+  return `rounded-2xl px-3 py-2.5 text-sm font-semibold transition ${
+    active
+      ? "bg-[#D4AF37]/10 text-[#F5D76E]"
+      : "text-[#CBD5E1] hover:bg-white/[0.07] hover:text-[#F5D76E]"
+  }`;
+}
+
 export default function AppHeaderClient() {
   const { dictionary } = useLocale();
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
-  const secondaryLinks = [
-    { href: "/temples", label: dictionary.nav.temples },
-    { href: "/ai", label: "AI Guide" },
-    { href: "/favorites", label: "Favorites" },
-    { href: "/ai-history", label: "AI History" },
-    { href: "/reminders", label: dictionary.nav.reminders },
-    { href: "/about", label: "About" },
-    { href: "/privacy", label: "Privacy" },
-    { href: "/terms", label: "Terms" },
-    { href: "/profile", label: dictionary.nav.profile },
+  const menuRef = useRef<HTMLDivElement | null>(null);
+
+  const menuGroups: Array<{ title: string; links: MenuLink[] }> = [
+    {
+      title: "Main",
+      links: [
+        { href: "/book", label: "Holy Books" },
+        { href: "/search", label: dictionary.nav.search },
+        { href: "/temples", label: dictionary.nav.temples },
+        { href: "/ai", label: "AI Guide" },
+      ],
+    },
+    {
+      title: "Personal",
+      links: [
+        { href: "/favorites", label: "Favorites" },
+        { href: "/ai-history", label: "AI History" },
+        { href: "/profile", label: dictionary.nav.profile },
+        { href: "/reminders", label: dictionary.nav.reminders },
+      ],
+    },
+    {
+      title: "Info",
+      links: [
+        { href: "/about", label: "About" },
+        { href: "/privacy", label: "Privacy" },
+        { href: "/terms", label: "Terms" },
+      ],
+    },
   ];
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    function handlePointerDown(event: PointerEvent) {
+      if (!menuRef.current?.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setIsOpen(false);
+      }
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen]);
 
   return (
     <header className="sticky top-3 z-[900] mb-8 rounded-[1.5rem] border border-white/12 bg-[#071A2F]/78 px-3 py-3 shadow-2xl shadow-black/20 backdrop-blur-xl sm:px-4">
@@ -36,13 +107,13 @@ export default function AppHeaderClient() {
         <nav className="flex items-center justify-end gap-2">
           <Link
             href="/book"
-            className="hidden rounded-2xl border border-transparent px-3 py-2 text-sm font-semibold text-[#CBD5E1] transition hover:border-[#D4AF37]/50 hover:bg-white/[0.06] hover:text-[#F5D76E] sm:inline-flex"
+            className={navLinkClass(isActivePath(pathname, "/book"))}
           >
             Holy Books
           </Link>
           <Link
             href="/search"
-            className="hidden rounded-2xl border border-transparent px-3 py-2 text-sm font-semibold text-[#CBD5E1] transition hover:border-[#D4AF37]/50 hover:bg-white/[0.06] hover:text-[#F5D76E] sm:inline-flex"
+            className={navLinkClass(isActivePath(pathname, "/search"))}
           >
             {dictionary.nav.search}
           </Link>
@@ -51,11 +122,15 @@ export default function AppHeaderClient() {
             <AuthButton />
           </div>
 
-          <div className="relative">
+          <div className="relative" ref={menuRef}>
             <button
               type="button"
               onClick={() => setIsOpen((value) => !value)}
-              className="rounded-2xl border border-white/12 bg-white/[0.06] px-4 py-2 text-sm font-bold text-[#F8FAFC] transition hover:border-[#D4AF37]/45 hover:bg-white/[0.1] hover:text-[#F5D76E]"
+              className={`rounded-2xl border px-4 py-2 text-sm font-bold transition ${
+                isOpen
+                  ? "border-[#D4AF37]/45 bg-[#D4AF37]/10 text-[#F5D76E]"
+                  : "border-white/12 bg-white/[0.06] text-[#F8FAFC] hover:border-[#D4AF37]/45 hover:bg-white/[0.1] hover:text-[#F5D76E]"
+              }`}
               aria-expanded={isOpen}
               aria-controls="site-menu"
             >
@@ -65,35 +140,30 @@ export default function AppHeaderClient() {
             {isOpen && (
               <div
                 id="site-menu"
-                className="absolute right-0 mt-3 w-[min(20rem,calc(100vw-2rem))] rounded-[1.5rem] border border-white/12 bg-[#071A2F]/95 p-3 shadow-2xl shadow-black/40 backdrop-blur-2xl"
+                className="absolute right-0 mt-3 max-h-[calc(100vh-7rem)] w-[min(22rem,calc(100vw-2rem))] overflow-y-auto rounded-[1.5rem] border border-[#D4AF37]/20 bg-[#071A2F]/96 p-3 shadow-2xl shadow-black/45 backdrop-blur-2xl"
               >
-                <div className="grid gap-1">
-                  <Link
-                    href="/book"
-                    onClick={() => setIsOpen(false)}
-                    className="rounded-2xl px-3 py-2.5 text-sm font-semibold text-[#CBD5E1] transition hover:bg-white/[0.07] hover:text-[#F5D76E] sm:hidden"
-                  >
-                    Holy Books
-                  </Link>
-                  <Link
-                    href="/search"
-                    onClick={() => setIsOpen(false)}
-                    className="rounded-2xl px-3 py-2.5 text-sm font-semibold text-[#CBD5E1] transition hover:bg-white/[0.07] hover:text-[#F5D76E] sm:hidden"
-                  >
-                    {dictionary.nav.search}
-                  </Link>
-                  {secondaryLinks.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setIsOpen(false)}
-                      className="rounded-2xl px-3 py-2.5 text-sm font-semibold text-[#CBD5E1] transition hover:bg-white/[0.07] hover:text-[#F5D76E]"
-                    >
-                      {item.label}
-                    </Link>
+                <div className="grid gap-4">
+                  {menuGroups.map((group) => (
+                    <div key={group.title}>
+                      <p className="px-3 text-[11px] font-black uppercase tracking-[0.2em] text-[#F5D76E]/80">
+                        {group.title}
+                      </p>
+                      <div className="mt-2 grid gap-1">
+                        {group.links.map((item) => (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            onClick={() => setIsOpen(false)}
+                            className={menuLinkClass(isActivePath(pathname, item.href))}
+                          >
+                            {item.label}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
                   ))}
                 </div>
-                <div className="mt-3 border-t border-white/10 pt-3">
+                <div className="mt-4 border-t border-white/10 pt-3">
                   <LanguageSwitcher />
                 </div>
                 <div className="mt-3 border-t border-white/10 pt-3 md:hidden">
