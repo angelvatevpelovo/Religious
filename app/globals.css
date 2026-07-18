@@ -233,6 +233,34 @@ body {
     inset 0 1px 0 rgba(255, 255, 255, 0.09);
 }
 
+.book-library-shell {
+  background:
+    radial-gradient(ellipse at 82% 8%, rgba(212, 175, 55, 0.1), transparent 30rem),
+    radial-gradient(ellipse at 12% 34%, rgba(91, 141, 239, 0.1), transparent 34rem),
+    radial-gradient(ellipse at 72% 76%, rgba(92, 73, 168, 0.11), transparent 40rem),
+    linear-gradient(180deg, #030817 0%, #071426 46%, #050a15 100%) !important;
+}
+
+.book-library-atmosphere {
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.16) 0 0.65px, transparent 1px),
+    radial-gradient(circle, rgba(245, 215, 110, 0.1) 0 0.7px, transparent 1.15px),
+    linear-gradient(rgba(255, 255, 255, 0.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.028) 1px, transparent 1px);
+  background-position:
+    0 0,
+    56px 42px,
+    0 0,
+    0 0;
+  background-size:
+    128px 128px,
+    206px 206px,
+    88px 88px,
+    88px 88px;
+  mask-image: radial-gradient(ellipse at 50% 20%, black 0%, black 48%, transparent 86%);
+  opacity: 0.42;
+}
+
 @keyframes sacredFieldDrift {
   0%,
   100% {
