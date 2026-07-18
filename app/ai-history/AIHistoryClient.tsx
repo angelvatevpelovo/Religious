@@ -158,7 +158,7 @@ export default function AIHistoryClient() {
 
   if (!authChecked || loading) {
     return (
-      <GlassCard className="mt-8 p-6 text-[#CBD5E1]">
+      <GlassCard className="user-glass-panel mt-8 p-6 text-[#CBD5E1]">
         Loading AI history...
       </GlassCard>
     );
@@ -168,7 +168,7 @@ export default function AIHistoryClient() {
     return (
       <section className="mt-8">
         <BackLink href="/ai">Back to AI Assistant</BackLink>
-        <GlassCard className="mt-6 p-8">
+        <GlassCard className="user-glass-panel mt-6 p-8">
           <h2 className="text-2xl font-bold text-[#D4AF37]">Login to view history</h2>
           <p className="mt-3 max-w-2xl leading-7 text-[#CBD5E1]">
             You can use the AI Assistant without logging in, but saved question history is
@@ -196,11 +196,20 @@ export default function AIHistoryClient() {
       )}
 
       {!error && historyItems.length === 0 && (
-        <GlassCard className="mt-6 p-8 text-center">
-          <h2 className="text-2xl font-bold text-[#D4AF37]">No saved AI history yet</h2>
+        <GlassCard className="user-glass-panel mt-6 p-8 text-center">
+          <div className="mx-auto h-14 w-14 rounded-full border border-[#D4AF37]/50 bg-[#D4AF37]/10 shadow-lg shadow-[#D4AF37]/10" />
+          <h2 className="mt-5 text-2xl font-bold text-[#F8FAFC]">
+            No AI conversations yet.
+          </h2>
           <p className="mx-auto mt-3 max-w-xl leading-7 text-[#CBD5E1]">
             Ask a question while logged in, and the question and answer will appear here.
           </p>
+          <Link
+            href="/ai"
+            className="mt-6 inline-flex rounded-2xl bg-[#D4AF37] px-5 py-3 text-sm font-bold text-[#071A2F] transition hover:bg-[#F5D76E]"
+          >
+            Ask the AI Guide
+          </Link>
         </GlassCard>
       )}
 
@@ -209,7 +218,7 @@ export default function AIHistoryClient() {
           {historyItems.map((item) => (
             <article
               key={item.id}
-              className="rounded-[2rem] border border-white/12 bg-white/[0.06] p-5 shadow-2xl shadow-black/20 backdrop-blur-xl"
+              className="rounded-[2rem] border border-white/12 bg-white/[0.055] p-5 shadow-2xl shadow-black/20 backdrop-blur-xl transition hover:border-[#D4AF37]/40 hover:bg-white/[0.075]"
             >
               <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                 <h2 className="text-xl font-bold text-[#D4AF37]">{item.title}</h2>

@@ -3,11 +3,12 @@ import AIHistoryClient from "./AIHistoryClient";
 
 export default function AIHistoryPage() {
   return (
-    <PageShell>
+    <PageShell className="user-page-shell">
       <HeroPanel
+        className="user-glass-panel mt-10"
         eyebrow="AI Assistant"
         title="AI History"
-        description="Review saved spiritual questions and reflective answers from your logged-in sessions."
+        description="Review your previous spiritual reflections and the questions you explored while signed in."
       />
 
       <AIHistoryClient />

@@ -153,22 +153,22 @@ export default function ProfileClient() {
   }
 
   return (
-    <PageShell>
+    <PageShell className="user-page-shell">
       <BackLink>Back Home</BackLink>
 
       <HeroPanel
-        className="mt-10"
+        className="user-glass-panel mt-10"
         eyebrow="Personal Space"
         title="Your Profile"
-        description="Manage your name, spiritual preferences and short personal bio."
+        description="Manage your RELIGIOUS identity, saved preferences and the personal spaces connected to your account."
       />
 
       {loading ? (
-        <GlassCard className="mt-8 p-6 text-[#CBD5E1]">
+        <GlassCard className="user-glass-panel mt-8 p-6 text-[#CBD5E1]">
           Loading profile...
         </GlassCard>
       ) : !userId ? (
-        <GlassCard className="mt-8 p-8">
+        <GlassCard className="user-glass-panel mt-8 p-8">
           <h2 className="text-2xl font-bold text-[#F8FAFC]">
             Login required
           </h2>
@@ -183,10 +183,10 @@ export default function ProfileClient() {
           </Link>
         </GlassCard>
       ) : (
-        <div className="mt-8 grid gap-8 lg:grid-cols-[0.8fr_1.2fr]">
-          <GlassCard className="p-6">
+        <div className="mt-8 grid gap-8 lg:grid-cols-[0.82fr_1.18fr]">
+          <GlassCard className="user-glass-panel p-6">
             <div className="flex items-center gap-4">
-              <div className="flex h-16 w-16 items-center justify-center rounded-3xl border border-[#D4AF37]/40 bg-[#D4AF37]/10 text-2xl font-bold text-[#F5D76E]">
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-3xl border border-[#D4AF37]/45 bg-[#D4AF37]/10 text-2xl font-bold text-[#F5D76E] shadow-lg shadow-[#D4AF37]/10">
                 {(displayName || email || "U").charAt(0).toUpperCase()}
               </div>
               <div>
@@ -209,9 +209,27 @@ export default function ProfileClient() {
                 {bio || "No bio yet."}
               </p>
             </div>
+
+            <div className="user-gold-divider mt-6" />
+
+            <div className="mt-6 grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+              {[
+                { href: "/favorites", label: "Favorites" },
+                { href: "/ai-history", label: "AI History" },
+                { href: "/book", label: "Sacred Texts" },
+              ].map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-3 text-sm font-bold text-[#F5D76E] transition hover:border-[#D4AF37]/55 hover:bg-[#D4AF37]/10"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
           </GlassCard>
 
-          <GlassCard className="p-6">
+          <GlassCard className="user-glass-panel p-6">
             <h2 className="text-2xl font-bold text-[#F8FAFC]">
               Edit Preferences
             </h2>

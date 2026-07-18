@@ -3,17 +3,18 @@ import { BackLink, GlassCard, HeroPanel, PageShell } from "../../components/Desi
 
 export default function RemindersPage() {
   return (
-    <PageShell>
+    <PageShell className="user-page-shell">
       <BackLink>Back Home</BackLink>
 
       <HeroPanel
-        className="mt-10"
+        className="user-glass-panel mt-10"
         eyebrow="Coming Soon"
         title="Reminders"
-        description="Personal prayer, reflection and sacred event reminders are planned for version 2. For the first MVP, this page is intentionally paused so the launch stays stable."
+        description="Spiritual reminders are coming soon. This space will return in version 2 as a calm way to remember prayer, reflection and sacred moments."
       />
 
-      <GlassCard className="mt-8 p-6 sm:p-8">
+      <GlassCard className="user-glass-panel mt-8 p-6 sm:p-8">
+        <div className="mb-6 h-16 w-16 rounded-full border border-[#D4AF37]/50 bg-[#D4AF37]/10 shadow-lg shadow-[#D4AF37]/10" />
         <h2 className="text-2xl font-bold text-[#D4AF37]">
           Reminders are deferred to V2
         </h2>
