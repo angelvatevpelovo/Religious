@@ -1,482 +1,152 @@
 import type { Metadata } from "next";
-import {
-  EmptyState,
-  FeatureCard,
-  GoldButton,
-  PageShell,
-  SectionHeader,
-} from "../components/DesignSystem";
-import { dictionaries } from "../lib/i18n";
-import { getServerLocale } from "../lib/i18n-server";
-import { supabase } from "../lib/supabase";
-
-export const dynamic = "force-dynamic";
+import Link from "next/link";
+import { PageShell } from "../components/DesignSystem";
 
 export const metadata: Metadata = {
   title: "RELIGIOUS",
   description:
-    "A calm spiritual companion for sacred texts, prayers, temples, favorites and reflective AI guidance.",
+    "Explore sacred wisdom across religions through holy books, search, temples and calm reflective guidance.",
   alternates: {
     canonical: "/",
   },
 };
 
-type MaybeArray<T> = T | T[] | null;
+const mainFeatures = [
+  {
+    title: "Holy Books",
+    description: "Read sacred texts from many religious traditions.",
+    cta: "Open Library",
+    href: "/book",
+  },
+  {
+    title: "Temples",
+    description: "Explore sacred places and temples around the world.",
+    cta: "Explore Temples",
+    href: "/temples",
+  },
+  {
+    title: "AI Guide",
+    description: "Ask spiritual questions with calm guidance.",
+    cta: "Ask AI Guide",
+    href: "/ai",
+  },
+];
 
-type DailyPrayer = {
-  id: string;
-  title: string | null;
-  content: string | null;
-  category: string | null;
-  religions: MaybeArray<{ name: string | null }>;
-};
+const secondaryLinks = [
+  { href: "/about", label: "About" },
+  { href: "/privacy", label: "Privacy" },
+  { href: "/terms", label: "Terms" },
+  { href: "/reminders", label: "Reminders" },
+  { href: "/favorites", label: "Favorites" },
+  { href: "/ai-history", label: "AI History" },
+];
 
-type DailyVerse = {
-  id: string;
-  chapter_id: string | null;
-  verse_number: number | null;
-  content: string | null;
-  chapters: MaybeArray<{
-    id: string | null;
-    title: string | null;
-    chapter_number: number | null;
-  }>;
-};
-
-type DailyEvent = {
-  id: string;
-  religion: string | null;
-  title: string | null;
-  description: string | null;
-  event_date: string | null;
-  country: string | null;
-  is_global: boolean | null;
-};
-
-type DailyTemple = {
-  id: string;
-  name: string | null;
-  religion: string | null;
-  country: string | null;
-  city: string | null;
-  description: string | null;
-  image_url: string | null;
-};
-
-function firstValue<T>(value: MaybeArray<T> | undefined): T | null {
-  if (Array.isArray(value)) {
-    return value[0] ?? null;
-  }
-
-  return value ?? null;
+function SacredRings() {
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+      <div className="sacred-depth-field absolute inset-0" />
+      <div className="sacred-ring sacred-ring-one" />
+      <div className="sacred-ring sacred-ring-two" />
+      <div className="sacred-ring sacred-ring-three" />
+      <div className="cosmic-grid absolute inset-0 opacity-35" />
+    </div>
+  );
 }
 
-function dailyIndex(count: number, salt: string) {
-  const dateKey = new Date().toISOString().slice(0, 10);
-  const input = `${dateKey}:${salt}`;
-  let hash = 0;
-
-  for (let index = 0; index < input.length; index += 1) {
-    hash = (hash * 31 + input.charCodeAt(index)) >>> 0;
-  }
-
-  return count > 0 ? hash % count : 0;
-}
-
-async function getDailyPrayer() {
-  const { count } = await supabase
-    .from("prayers")
-    .select("id", { count: "exact", head: true });
-
-  if (!count) return null;
-
-  const index = dailyIndex(count, "prayer");
-  const { data } = await supabase
-    .from("prayers")
-    .select("id, title, content, category, religions(name)")
-    .order("created_at", { ascending: true })
-    .range(index, index)
-    .maybeSingle();
-
-  return data as unknown as DailyPrayer | null;
-}
-
-async function getDailyVerse() {
-  const { count } = await supabase
-    .from("verses")
-    .select("id", { count: "exact", head: true });
-
-  if (!count) return null;
-
-  const index = dailyIndex(count, "verse");
-  const { data } = await supabase
-    .from("verses")
-    .select(
-      "id, chapter_id, verse_number, content, chapters(id, title, chapter_number)"
-    )
-    .order("id", { ascending: true })
-    .range(index, index)
-    .maybeSingle();
-
-  return data as unknown as DailyVerse | null;
-}
-
-async function getDailyEvent() {
-  const { count } = await supabase
-    .from("religious_events")
-    .select("id", { count: "exact", head: true });
-
-  if (!count) return null;
-
-  const index = dailyIndex(count, "event");
-  const { data } = await supabase
-    .from("religious_events")
-    .select("id, religion, title, description, event_date, country, is_global")
-    .order("event_date", { ascending: true })
-    .range(index, index)
-    .maybeSingle();
-
-  return data as unknown as DailyEvent | null;
-}
-
-async function getDailyTemple() {
-  const { count } = await supabase
-    .from("temples")
-    .select("id", { count: "exact", head: true });
-
-  if (!count) return null;
-
-  const index = dailyIndex(count, "temple");
-  const { data } = await supabase
-    .from("temples")
-    .select("id, name, religion, country, city, description, image_url")
-    .order("name", { ascending: true })
-    .range(index, index)
-    .maybeSingle();
-
-  return data as unknown as DailyTemple | null;
-}
-
-function formatEventDate(value: string | null, locale: string, emptyLabel: string) {
-  if (!value) return emptyLabel;
-
-  return new Intl.DateTimeFormat(locale, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(new Date(`${value}T00:00:00`));
-}
-
-export default async function HomePage() {
-  const locale = await getServerLocale();
-  const t = dictionaries[locale].home;
-  const [
-    { data: religions },
-    { data: holyBooks },
-    prayerOfDay,
-    verseOfDay,
-    eventOfDay,
-    templeOfDay,
-  ] = await Promise.all([
-    supabase.from("religions").select("*").order("name"),
-    supabase.from("holy_books").select("*").order("title"),
-    getDailyPrayer(),
-    getDailyVerse(),
-    getDailyEvent(),
-    getDailyTemple(),
-  ]);
-
-  const prayerReligion = firstValue(prayerOfDay?.religions);
-  const verseChapter = firstValue(verseOfDay?.chapters);
-  const featureCards = [
-    {
-      eyebrow: "Study",
-      title: "Bible Search",
-      description:
-        "Search scripture quickly and return to passages with a calm, focused reading flow.",
-      href: "/search",
-    },
-    {
-      eyebrow: "Library",
-      title: "Holy Books",
-      description:
-        "Explore sacred texts and chapters through a simple, respectful digital library.",
-      href: "/book",
-    },
-    {
-      eyebrow: "Prayer",
-      title: "Prayers",
-      description:
-        "Find reflective prayers and spiritual resources for daily moments of stillness.",
-      href: prayerOfDay?.id ? `/prayer/${prayerOfDay.id}` : "/book",
-    },
-    {
-      eyebrow: "Places",
-      title: "Temples Map",
-      description:
-        "Discover sacred places with cards, filters and an interactive temple map.",
-      href: "/temples",
-    },
-    {
-      eyebrow: "Guide",
-      title: "AI Assistant",
-      description:
-        "Ask spiritual questions and receive careful, informational guidance.",
-      href: "/ai",
-    },
-  ];
-
+export default function HomePage() {
   return (
     <PageShell className="relative overflow-hidden">
-      <div className="cosmic-grid pointer-events-none absolute inset-0 opacity-60" />
-      <div className="pointer-events-none absolute left-[-8rem] top-24 h-80 w-80 rounded-full bg-[#D4AF37]/20 blur-3xl" />
-      <div className="pointer-events-none absolute right-[-10rem] top-48 h-96 w-96 rounded-full bg-sky-400/10 blur-3xl" />
+      <SacredRings />
 
       <div className="relative">
-        <section className="gold-aura overflow-hidden rounded-[2.5rem] border border-white/15 bg-[#071A2F]/70 p-6 shadow-2xl shadow-black/35 backdrop-blur-2xl sm:p-8 lg:p-12">
-          <div className="grid gap-10 lg:grid-cols-[1.04fr_0.96fr] lg:items-center">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.28em] text-[#F5D76E]">
-                RELIGIOUS
-              </p>
-              <h1 className="mt-5 max-w-5xl text-5xl font-black tracking-normal text-[#F8FAFC] sm:text-6xl lg:text-7xl">
-                A spiritual web app for the next era of sacred discovery.
+        <section className="relative flex min-h-[calc(100svh-9rem)] items-center py-10 sm:py-14 lg:py-20">
+          <div className="mx-auto grid w-full gap-10 lg:grid-cols-[1.06fr_0.94fr] lg:items-center">
+            <div className="max-w-4xl">
+              <div className="inline-flex rounded-full border border-[#D4AF37]/35 bg-[#D4AF37]/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-[#F5D76E] shadow-lg shadow-[#D4AF37]/10 backdrop-blur">
+                Sacred wisdom across humanity
+              </div>
+
+              <h1 className="mt-7 max-w-5xl text-5xl font-black leading-[0.98] tracking-normal text-[#F8FAFC] sm:text-6xl lg:text-7xl">
+                Explore Sacred Wisdom Across Religions
               </h1>
-              <p className="mt-6 max-w-3xl text-lg leading-8 text-[#DCE7F4] sm:text-xl">
-                Search scripture, explore holy books, find prayers, discover
-                sacred places and ask reflective questions in one respectful
-                multi-faith space.
+
+              <p className="mt-6 max-w-2xl text-lg leading-8 text-[#DCE7F4] sm:text-xl">
+                Read holy books, discover spiritual traditions, explore
+                temples, and search timeless wisdom in one calm sacred space.
               </p>
 
-              <div className="mt-8 flex flex-wrap gap-3">
-                <GoldButton href="/search">Search</GoldButton>
-                <GoldButton
+              <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+                <Link
                   href="/book"
-                  className="border border-white/14 bg-white/[0.07] text-[#F8FAFC] hover:bg-white/[0.12]"
+                  className="inline-flex items-center justify-center rounded-2xl bg-[#D4AF37] px-6 py-3.5 text-sm font-black text-[#071A2F] shadow-2xl shadow-[#D4AF37]/20 transition hover:bg-[#F5D76E]"
                 >
-                  Holy Books
-                </GoldButton>
-                <GoldButton
-                  href="/temples"
-                  className="border border-white/14 bg-white/[0.07] text-[#F8FAFC] hover:bg-white/[0.12]"
+                  Explore Holy Books
+                </Link>
+                <Link
+                  href="/search"
+                  className="inline-flex items-center justify-center rounded-2xl border border-white/14 bg-white/[0.07] px-6 py-3.5 text-sm font-bold text-[#F8FAFC] shadow-xl shadow-black/10 backdrop-blur transition hover:border-[#D4AF37]/45 hover:bg-white/[0.11] hover:text-[#F5D76E]"
                 >
-                  Temples
-                </GoldButton>
-                <GoldButton
-                  href="/ai"
-                  className="border border-[#D4AF37]/35 bg-[#D4AF37]/10 text-[#F5D76E] hover:bg-[#D4AF37]/18"
-                >
-                  AI Assistant
-                </GoldButton>
+                  Search Texts
+                </Link>
               </div>
             </div>
 
-            <div className="premium-glass relative overflow-hidden rounded-[2rem] p-6 sm:p-8">
-              <div className="absolute right-[-4rem] top-[-4rem] h-48 w-48 rounded-full bg-[#D4AF37]/20 blur-3xl" />
-              <div className="relative">
-                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#F5D76E]">
-                  {t.today}
-                </p>
-                <h2 className="mt-4 text-3xl font-bold text-[#F8FAFC]">
-                  {t.stillness}
-                </h2>
-                <p className="mt-4 leading-7 text-[#CBD5E1]">
-                  A quiet daily constellation from prayer, scripture, calendar
-                  and sacred places.
-                </p>
-                <div className="mt-8 grid gap-3 sm:grid-cols-2">
-                  <FeatureCard
-                    title={t.libraryTitle}
-                    href="/book"
-                    eyebrow={t.read}
-                    className="rounded-[1.5rem] bg-white/[0.055]"
-                  />
-                  <FeatureCard
-                    title={dictionaries[locale].nav.temples}
-                    href="/temples"
-                    eyebrow={t.explore}
-                    className="rounded-[1.5rem] bg-white/[0.055]"
-                  />
-                  <FeatureCard
-                    title={dictionaries[locale].nav.calendar}
-                    href="/calendar"
-                    eyebrow={t.observe}
-                    className="rounded-[1.5rem] bg-white/[0.055]"
-                  />
-                  <FeatureCard
-                    title={dictionaries[locale].nav.reminders}
-                    href="/reminders"
-                    eyebrow={t.return}
-                    className="rounded-[1.5rem] bg-white/[0.055]"
-                  />
+            <div className="relative mx-auto w-full max-w-lg lg:max-w-none">
+              <div className="premium-glass sacred-orbit-panel relative min-h-[24rem] overflow-hidden rounded-[2rem] p-7 sm:p-8">
+                <div className="absolute inset-8 rounded-full border border-[#D4AF37]/20" />
+                <div className="absolute inset-16 rounded-full border border-white/10" />
+                <div className="absolute left-1/2 top-1/2 h-36 w-36 -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#D4AF37]/40 bg-[#D4AF37]/10 shadow-[0_0_80px_rgba(212,175,55,0.22)]" />
+                <div className="relative flex min-h-[20rem] flex-col justify-end">
+                  <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#F5D76E]">
+                    Calm digital sanctuary
+                  </p>
+                  <p className="mt-4 max-w-sm text-2xl font-semibold leading-9 text-[#F8FAFC]">
+                    A quieter way to study, reflect and return to what matters.
+                  </p>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        <section className="mt-16">
-          <SectionHeader
-            eyebrow="Core tools"
-            title="A premium spiritual workspace"
-            description="RELIGIOUS keeps the essentials close: text, prayer, sacred places and reflective guidance, all designed for clarity rather than noise."
-          />
-
-          <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-5">
-            {featureCards.map((card) => (
-              <FeatureCard
-                key={card.title}
-                eyebrow={card.eyebrow}
-                title={card.title}
-                description={card.description}
-                href={card.href}
-                className="premium-glass rounded-[1.75rem]"
-              />
+        <section className="pb-12">
+          <div className="grid gap-4 md:grid-cols-3">
+            {mainFeatures.map((feature) => (
+              <Link
+                key={feature.title}
+                href={feature.href}
+                className="premium-glass group rounded-[1.5rem] p-6 transition hover:-translate-y-1 hover:border-[#D4AF37]/45 hover:bg-white/[0.09]"
+              >
+                <h2 className="text-2xl font-bold text-[#F8FAFC]">
+                  {feature.title}
+                </h2>
+                <p className="mt-3 min-h-16 leading-7 text-[#CBD5E1]">
+                  {feature.description}
+                </p>
+                <span className="mt-5 inline-flex text-sm font-bold text-[#F5D76E] transition group-hover:text-[#FFF3B0]">
+                  {feature.cta}
+                </span>
+              </Link>
             ))}
           </div>
         </section>
 
-      <section className="mt-16">
-        <SectionHeader
-          eyebrow={t.dailyEyebrow}
-          title={t.dailyTitle}
-          description={t.dailyDescription}
-        />
-
-        <div className="mt-8 grid gap-5 lg:grid-cols-2">
-          <FeatureCard
-            eyebrow={t.prayerOfDay}
-            title={prayerOfDay?.title ?? t.noPrayer}
-            description={
-              prayerOfDay?.content
-                ? prayerOfDay.content.slice(0, 260)
-                : t.noPrayerDescription
-            }
-            href={prayerOfDay?.id ? `/prayer/${prayerOfDay.id}` : "/book"}
-          >
-            <p className="mt-5 text-sm font-semibold text-[#F5D76E]">
-              {prayerReligion?.name ?? prayerOfDay?.category ?? "Prayer"}
-            </p>
-          </FeatureCard>
-
-          <FeatureCard
-            eyebrow={t.verseOfDay}
-            title={
-              verseChapter
-                ? `${verseChapter.title ?? "Bible"} ${
-                    verseChapter.chapter_number ?? ""
-                  }:${verseOfDay?.verse_number ?? ""}`.trim()
-                : t.noVerse
-            }
-            description={
-              verseOfDay?.content ??
-              t.noVerseDescription
-            }
-            href={
-              verseOfDay?.chapter_id ? `/chapter/${verseOfDay.chapter_id}` : "/book"
-            }
-          />
-
-          <FeatureCard
-            eyebrow={t.eventOfDay}
-            title={eventOfDay?.title ?? t.noEvent}
-            description={
-              eventOfDay?.description ??
-              t.noEventDescription
-            }
-            href="/calendar"
-          >
-            <div className="mt-5 flex flex-wrap gap-2 text-xs font-bold">
-              <span className="rounded-full border border-[#D4AF37]/40 bg-[#D4AF37]/10 px-3 py-1 text-[#F5D76E]">
-                {eventOfDay?.religion ?? "Calendar"}
-              </span>
-              <span className="rounded-full border border-white/12 bg-white/[0.06] px-3 py-1 text-[#CBD5E1]">
-                {formatEventDate(eventOfDay?.event_date ?? null, locale, t.dateNotSet)}
-              </span>
-              {eventOfDay && (
-                <span className="rounded-full border border-white/12 bg-white/[0.06] px-3 py-1 text-[#CBD5E1]">
-                  {eventOfDay.is_global ? t.global : eventOfDay.country ?? t.regional}
-                </span>
-              )}
-            </div>
-          </FeatureCard>
-
-          <FeatureCard
-            eyebrow={t.placeOfDay}
-            title={templeOfDay?.name ?? t.noPlace}
-            description={
-              templeOfDay?.description ??
-              t.noPlaceDescription
-            }
-            href={templeOfDay?.id ? `/temple/${templeOfDay.id}` : "/temples"}
-            className="overflow-hidden"
-          >
-            {templeOfDay?.image_url && (
-              <div
-                className="mt-5 h-44 rounded-[1.5rem] border border-white/12 bg-cover bg-center"
-                style={{ backgroundImage: `url(${templeOfDay.image_url})` }}
-                aria-label={`Image of ${templeOfDay.name ?? "sacred place"}`}
-              />
-            )}
-            <p className="mt-5 text-sm font-semibold text-[#F5D76E]">
-              {[templeOfDay?.city, templeOfDay?.country]
-                .filter(Boolean)
-                .join(", ") || templeOfDay?.religion || t.sacredPlace}
-            </p>
-          </FeatureCard>
-        </div>
-      </section>
-
-      <section className="mt-16">
-        <SectionHeader
-          eyebrow={t.libraryEyebrow}
-          title={t.libraryTitle}
-          description={t.libraryDescription}
-        />
-
-        <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {!holyBooks || holyBooks.length === 0 ? (
-            <div className="md:col-span-2 xl:col-span-3">
-              <EmptyState title={t.noBooks} />
-            </div>
-          ) : (
-            holyBooks.map((book) => (
-              <FeatureCard
-                key={book.id}
-                href={`/book/${book.id}`}
-                eyebrow={t.sacredText}
-                title={book.title}
-                description={book.description}
-              />
-            ))
-          )}
-        </div>
-      </section>
-
-      <section className="mt-16">
-        <SectionHeader
-          eyebrow={t.traditionsEyebrow}
-          title={t.traditionsTitle}
-          description={t.traditionsDescription}
-        />
-
-        <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {!religions || religions.length === 0 ? (
-            <div className="md:col-span-2 xl:col-span-3">
-              <EmptyState title={t.noReligions} />
-            </div>
-          ) : (
-            religions.map((religion) => (
-              <FeatureCard
-                key={religion.id}
-                href={`/religion/${religion.id}`}
-                title={religion.name}
-                description={religion.description}
-              />
-            ))
-          )}
-        </div>
-      </section>
+        <footer className="pb-28 pt-4 md:pb-12">
+          <div className="flex flex-col gap-5 border-t border-white/10 pt-7 text-sm text-[#94A3B8] sm:flex-row sm:items-center sm:justify-between">
+            <p>RELIGIOUS keeps sacred tools close, without crowding the path.</p>
+            <nav className="flex flex-wrap gap-x-5 gap-y-3">
+              {secondaryLinks.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="transition hover:text-[#F5D76E]"
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
+        </footer>
       </div>
     </PageShell>
   );

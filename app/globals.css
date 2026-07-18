@@ -80,6 +80,120 @@ body {
   color: transparent;
 }
 
+@keyframes sacredFieldDrift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(0, -1.2rem, 0) scale(1.03);
+  }
+}
+
+@keyframes sacredRingDrift {
+  0%,
+  100% {
+    transform: rotateX(66deg) rotateZ(-18deg) translate3d(0, 0, 0);
+  }
+  50% {
+    transform: rotateX(68deg) rotateZ(-12deg) translate3d(0, -0.75rem, 0);
+  }
+}
+
+.sacred-depth-field {
+  animation: sacredFieldDrift 18s ease-in-out infinite;
+  background:
+    conic-gradient(from 118deg at 72% 30%, rgba(212, 175, 55, 0.2), transparent 18%, rgba(91, 141, 239, 0.13), transparent 42%, rgba(212, 175, 55, 0.12), transparent 70%),
+    radial-gradient(ellipse at 50% 16%, rgba(245, 215, 110, 0.18), transparent 42%),
+    radial-gradient(ellipse at 68% 72%, rgba(51, 92, 154, 0.26), transparent 48%);
+  filter: saturate(1.15);
+  opacity: 0.9;
+}
+
+.sacred-ring {
+  animation: sacredRingDrift 22s ease-in-out infinite;
+  border: 1px solid rgba(212, 175, 55, 0.18);
+  border-radius: 9999px;
+  box-shadow:
+    0 0 80px rgba(212, 175, 55, 0.08),
+    inset 0 0 40px rgba(255, 255, 255, 0.035);
+  position: absolute;
+  transform-style: preserve-3d;
+}
+
+.sacred-ring::before,
+.sacred-ring::after {
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: inherit;
+  content: "";
+  inset: 14%;
+  position: absolute;
+}
+
+.sacred-ring::after {
+  border-color: rgba(245, 215, 110, 0.11);
+  inset: 28%;
+}
+
+.sacred-ring-one {
+  height: 42rem;
+  right: -15rem;
+  top: 2rem;
+  width: 42rem;
+}
+
+.sacred-ring-two {
+  animation-delay: -8s;
+  height: 30rem;
+  left: -12rem;
+  opacity: 0.58;
+  top: 18rem;
+  width: 30rem;
+}
+
+.sacred-ring-three {
+  animation-delay: -14s;
+  bottom: -30rem;
+  height: 58rem;
+  left: 20%;
+  opacity: 0.42;
+  width: 58rem;
+}
+
+.sacred-orbit-panel {
+  transform-style: preserve-3d;
+}
+
+.sacred-orbit-panel::before {
+  background:
+    linear-gradient(115deg, transparent 12%, rgba(245, 215, 110, 0.22), transparent 42%),
+    linear-gradient(245deg, transparent 22%, rgba(255, 255, 255, 0.1), transparent 52%);
+  content: "";
+  inset: -35%;
+  opacity: 0.55;
+  position: absolute;
+  transform: rotate(18deg);
+}
+
+.sacred-orbit-panel::after {
+  border: 1px solid rgba(212, 175, 55, 0.16);
+  border-radius: 9999px;
+  content: "";
+  height: 78%;
+  left: 11%;
+  position: absolute;
+  top: 11%;
+  transform: rotateX(68deg) rotateZ(-18deg);
+  width: 78%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sacred-depth-field,
+  .sacred-ring {
+    animation: none;
+  }
+}
+
 .leaflet-container {
   font-family: Arial, Helvetica, sans-serif;
 }
