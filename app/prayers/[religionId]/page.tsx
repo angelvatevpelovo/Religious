@@ -1,4 +1,10 @@
 import Link from "next/link";
+import {
+  BackLink,
+  GlassCard,
+  PageShell,
+  SectionHeader,
+} from "../../../components/DesignSystem";
 import { supabase } from "../../../lib/supabase";
 
 export default async function PrayersPage({
@@ -25,53 +31,54 @@ export default async function PrayersPage({
   }
 
   return (
-    <main className="min-h-screen bg-[#0F2744] p-10 text-white">
-      <Link
-        href={`/religion/${religionId}`}
-        className="text-[#D4AF37] hover:underline"
-      >
-        ← Back
-      </Link>
+    <PageShell className="user-page-shell">
+      <BackLink href={`/religion/${religionId}`}>Back to tradition</BackLink>
 
-      <h1 className="mt-10 text-5xl font-bold text-[#D4AF37]">
-        Prayers
-      </h1>
-
-      <p className="mt-3 text-lg text-white/70">
-        {religion?.name}
-      </p>
+      <SectionHeader
+        className="mt-10"
+        eyebrow={religion?.name || "Prayers"}
+        title="Prayers"
+        description="A quiet collection of prayers connected to this tradition."
+      />
 
       <div className="mt-10 grid gap-5">
         {!prayers || prayers.length === 0 ? (
-          <div className="rounded-2xl border border-white/20 bg-white/10 p-6">
-            <p className="font-semibold">
-              Все още няма добавени молитви за тази религия.
+          <GlassCard className="user-glass-panel p-6">
+            <h2 className="text-2xl font-bold text-[#F8FAFC]">
+              No prayers are available yet.
+            </h2>
+            <p className="mt-3 leading-7 text-[#CBD5E1]">
+              This tradition does not have prayer entries in the current
+              collection.
             </p>
-          </div>
+          </GlassCard>
         ) : (
           prayers.map((prayer) => (
             <Link
               key={prayer.id}
               href={`/prayer/${prayer.id}`}
-              className="block rounded-2xl border border-white/20 bg-white/10 p-6 transition hover:bg-white/15"
+              className="group block rounded-[1.5rem] border border-white/12 bg-white/[0.055] p-6 shadow-2xl shadow-black/20 backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-[#D4AF37]/50 hover:bg-white/[0.08]"
             >
-              <h2 className="text-2xl font-bold text-white">
+              <h2 className="text-2xl font-bold text-[#F8FAFC]">
                 {prayer.title}
               </h2>
 
               {prayer.category && (
-                <p className="mt-2 text-sm font-semibold uppercase tracking-wide text-[#D4AF37]">
+                <p className="mt-2 text-xs font-bold uppercase tracking-[0.18em] text-[#F5D76E]">
                   {prayer.category}
                 </p>
               )}
 
-              <p className="mt-4 leading-7 text-white/90">
+              <p className="mt-4 line-clamp-4 leading-7 text-[#CBD5E1]">
                 {prayer.content}
+              </p>
+              <p className="mt-5 text-sm font-bold text-[#F5D76E] transition group-hover:text-[#FFF3B0]">
+                Open prayer
               </p>
             </Link>
           ))
         )}
       </div>
-    </main>
+    </PageShell>
   );
 }

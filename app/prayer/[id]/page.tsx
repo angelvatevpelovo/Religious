@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { supabase } from "../../../lib/supabase";
 import FavoriteButton from "../../../components/FavoriteButton";
+import { BackLink, GlassCard, PageShell } from "../../../components/DesignSystem";
+import { supabase } from "../../../lib/supabase";
 
 export default async function PrayerPage({
   params,
@@ -17,58 +18,58 @@ export default async function PrayerPage({
 
   if (error || !prayer) {
     return (
-      <main className="min-h-screen bg-[#0F2744] p-10 text-white">
-        <Link href="/" className="text-[#D4AF37] hover:underline">
-          ← Back
-        </Link>
+      <PageShell className="user-page-shell">
+        <BackLink>Back Home</BackLink>
 
-        <h1 className="mt-10 text-4xl font-bold text-[#D4AF37]">
-          Prayer not found
-        </h1>
-      </main>
+        <GlassCard className="user-glass-panel mt-10 p-6 sm:p-8">
+          <h1 className="text-4xl font-bold text-[#D4AF37]">
+            Prayer not found
+          </h1>
+          <p className="mt-4 leading-7 text-[#CBD5E1]">
+            This prayer is not available in the current collection.
+          </p>
+          <Link
+            href="/book"
+            className="mt-6 inline-flex rounded-2xl bg-[#D4AF37] px-5 py-3 text-sm font-bold text-[#071A2F] transition hover:bg-[#F5D76E]"
+          >
+            Explore Sacred Texts
+          </Link>
+        </GlassCard>
+      </PageShell>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[#0F2744] p-10 text-white">
-      <Link
-        href={`/prayers/${prayer.religion_id}`}
-        className="text-[#D4AF37] hover:underline"
-      >
-        ← Back to Prayers
-      </Link>
+    <PageShell className="user-page-shell">
+      <BackLink href={`/prayers/${prayer.religion_id}`}>Back to Prayers</BackLink>
 
-      <section className="mx-auto mt-10 max-w-4xl rounded-3xl border border-white/20 bg-white/10 p-8">
-        <p className="text-sm font-semibold uppercase tracking-wide text-[#D4AF37]">
-          {prayer.religions?.name}
-        </p>
-
-        <h1 className="mt-4 text-5xl font-bold text-white">
-          {prayer.title}
-        </h1>
-
-        {prayer.category && (
-          <p className="mt-3 text-sm font-semibold uppercase tracking-wide text-[#D4AF37]">
-            {prayer.category}
+      <section className="mx-auto mt-10 max-w-4xl">
+        <GlassCard className="user-glass-panel p-6 sm:p-8">
+          <p className="text-sm font-bold uppercase tracking-[0.22em] text-[#F5D76E]">
+            {prayer.religions?.name || "Prayer"}
           </p>
-        )}
 
-        <p className="mt-8 whitespace-pre-line text-lg leading-9 text-white/90">
-          {prayer.content}
-        </p>
+          <h1 className="mt-4 text-4xl font-black tracking-normal text-[#F8FAFC] sm:text-5xl">
+            {prayer.title}
+          </h1>
 
-        <div className="mt-10 flex flex-wrap gap-4">
-          <FavoriteButton prayerId={prayer.id} />
+          {prayer.category && (
+            <p className="mt-3 text-xs font-bold uppercase tracking-[0.18em] text-[#F5D76E]">
+              {prayer.category}
+            </p>
+          )}
 
-          <button className="rounded-xl border border-white/20 px-5 py-3 font-bold text-white">
-            🔊 Read Aloud
-          </button>
+          <div className="user-gold-divider mt-8" />
 
-          <button className="rounded-xl border border-white/20 px-5 py-3 font-bold text-white">
-            📤 Share
-          </button>
-        </div>
+          <p className="mt-8 whitespace-pre-line text-lg leading-9 text-[#E2E8F0]">
+            {prayer.content}
+          </p>
+
+          <div className="mt-10 flex flex-wrap gap-4">
+            <FavoriteButton prayerId={prayer.id} />
+          </div>
+        </GlassCard>
       </section>
-    </main>
+    </PageShell>
   );
 }
