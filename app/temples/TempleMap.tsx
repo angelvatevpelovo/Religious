@@ -4,18 +4,8 @@ import L from "leaflet";
 import { useEffect, useMemo } from "react";
 import "leaflet.markercluster";
 import { MapContainer, TileLayer, useMap } from "react-leaflet";
+import { getTempleMarkerStyle } from "./templeDisplay";
 import type { TempleMapTemple } from "./types";
-
-const markerIcon = new L.Icon({
-  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  iconRetinaUrl:
-    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
-});
 
 function getPoint(temple: TempleMapTemple): [number, number] | null {
   const lat = Number(temple.latitude);
@@ -26,6 +16,18 @@ function getPoint(temple: TempleMapTemple): [number, number] | null {
   }
 
   return [lat, lng];
+}
+
+function markerIcon(temple: TempleMapTemple) {
+  const style = getTempleMarkerStyle(temple.religion);
+
+  return L.divIcon({
+    html: `<span class="temple-marker__symbol">${escapeHtml(style.symbol)}</span>`,
+    className: `temple-marker ${style.className}`,
+    iconSize: L.point(34, 42, true),
+    iconAnchor: [17, 38],
+    popupAnchor: [0, -34],
+  });
 }
 
 function escapeHtml(value: string | null | undefined) {
@@ -50,37 +52,43 @@ function googleMapsUrl(temple: TempleMapTemple) {
 }
 
 function popupHtml(temple: TempleMapTemple) {
+  const style = getTempleMarkerStyle(temple.religion);
   const image = temple.image_url
-    ? `<div style="height:128px;border:1px solid rgba(212,175,55,.25);border-radius:16px;background-image:url('${escapeHtml(
+    ? `<div class="temple-popup__image" style="background-image:url('${escapeHtml(
         temple.image_url
-      )}');background-size:cover;background-position:center;"></div>`
-    : `<div style="display:flex;height:128px;align-items:center;justify-content:center;border:1px solid rgba(212,175,55,.3);border-radius:16px;background:#0F2744;"><span style="font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#D4AF37;">Sacred Place</span></div>`;
-  const religion = temple.religion
-    ? `<div style="margin-top:16px;"><span style="display:inline-flex;border:1px solid rgba(212,175,55,.35);border-radius:999px;background:rgba(212,175,55,.1);padding:4px 12px;font-size:12px;font-weight:800;color:#F5D76E;">${escapeHtml(
-        temple.religion
-      )}</span></div>`
+      )}');"></div>`
+    : `<div class="temple-popup__image temple-popup__image--fallback"><span>${escapeHtml(
+        style.symbol
+      )}</span><small>Sacred Place</small></div>`;
+  const denomination = temple.denomination
+    ? `<span class="temple-popup__meta">${escapeHtml(temple.denomination)}</span>`
     : "";
   const location = getLocationLabel(temple) || "Location not available";
   const navigationUrl = googleMapsUrl(temple);
   const navigationLink = navigationUrl
     ? `<a href="${escapeHtml(
         navigationUrl
-      )}" target="_blank" rel="noreferrer" style="margin-top:10px;display:flex;width:100%;align-items:center;justify-content:center;border:1px solid rgba(212,175,55,.35);border-radius:16px;background:rgba(255,255,255,.06);padding:10px 16px;font-size:14px;font-weight:800;color:#F5D76E;text-decoration:none;">Navigate</a>`
+      )}" target="_blank" rel="noreferrer" class="temple-popup__button temple-popup__button--secondary">Navigate</a>`
     : "";
 
   return `
-    <div style="width:260px;overflow:hidden;border-radius:16px;background:#071A2F;padding:12px;color:#F8FAFC;box-shadow:0 24px 60px rgba(0,0,0,.4);">
+    <div class="temple-popup">
       ${image}
-      ${religion}
-      <h3 style="margin:12px 0 0;font-size:18px;line-height:1.25;font-weight:800;color:#F8FAFC;">${escapeHtml(
+      <div class="temple-popup__badges">
+        <span class="temple-popup__badge ${style.className}">${escapeHtml(
+          style.symbol
+        )} ${escapeHtml(style.label)}</span>
+        ${denomination}
+      </div>
+      <h3 class="temple-popup__title">${escapeHtml(
         temple.name || "Unnamed temple"
       )}</h3>
-      <p style="margin:8px 0 0;font-size:14px;line-height:1.6;color:#CBD5E1;">${escapeHtml(
+      <p class="temple-popup__location">${escapeHtml(
         location
       )}</p>
       <a href="/temple/${encodeURIComponent(
         temple.id
-      )}" style="margin-top:16px;display:flex;width:100%;align-items:center;justify-content:center;border-radius:16px;background:#D4AF37;padding:10px 16px;font-size:14px;font-weight:800;color:#071A2F;text-decoration:none;">View Details</a>
+      )}" class="temple-popup__button temple-popup__button--primary">View Details</a>
       ${navigationLink}
     </div>
   `;
@@ -114,7 +122,7 @@ function ClusteredTempleMarkers({
 
       if (!point) continue;
 
-      const marker = L.marker(point, { icon: markerIcon });
+      const marker = L.marker(point, { icon: markerIcon(temple) });
       marker.bindPopup(popupHtml(temple), {
         className: "religious-map-popup",
         maxWidth: 300,

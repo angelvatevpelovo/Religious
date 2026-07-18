@@ -1201,3 +1201,208 @@ body {
   min-width: 34px;
   padding: 0 8px;
 }
+
+.temple-marker {
+  align-items: center;
+  background:
+    radial-gradient(circle at 35% 24%, rgba(255, 255, 255, 0.24), transparent 28%),
+    linear-gradient(145deg, rgba(7, 26, 47, 0.96), rgba(3, 8, 23, 0.94));
+  border: 1px solid rgba(245, 215, 110, 0.78);
+  border-radius: 999px 999px 999px 0;
+  box-shadow:
+    0 8px 22px rgba(0, 0, 0, 0.45),
+    0 0 18px rgba(212, 175, 55, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  color: #f5d76e;
+  display: flex;
+  font-size: 17px;
+  font-weight: 900;
+  height: 34px !important;
+  justify-content: center;
+  transform: rotate(-45deg);
+  width: 34px !important;
+}
+
+.temple-marker__symbol {
+  display: block;
+  line-height: 1;
+  transform: rotate(45deg);
+}
+
+.temple-marker--christianity {
+  border-color: rgba(245, 215, 110, 0.9);
+  color: #fff3b0;
+}
+
+.temple-marker--islam {
+  border-color: rgba(109, 213, 166, 0.9);
+  color: #a7f3d0;
+}
+
+.temple-marker--judaism {
+  border-color: rgba(125, 184, 255, 0.9);
+  color: #bfdbfe;
+}
+
+.temple-marker--buddhism {
+  border-color: rgba(251, 191, 36, 0.9);
+  color: #fde68a;
+}
+
+.temple-marker--hinduism {
+  border-color: rgba(244, 114, 182, 0.9);
+  color: #fbcfe8;
+}
+
+.temple-marker--sikhism {
+  border-color: rgba(168, 85, 247, 0.9);
+  color: #e9d5ff;
+}
+
+.temple-marker--taoism {
+  border-color: rgba(45, 212, 191, 0.9);
+  color: #99f6e4;
+}
+
+.temple-marker--shinto {
+  border-color: rgba(248, 113, 113, 0.9);
+  color: #fecaca;
+}
+
+.temple-marker--egyptian {
+  border-color: rgba(251, 146, 60, 0.9);
+  color: #fed7aa;
+}
+
+.temple-marker--other,
+.temple-marker--sacred-place {
+  border-color: rgba(203, 213, 225, 0.78);
+  color: #e2e8f0;
+}
+
+.religious-map-popup .leaflet-popup-content-wrapper {
+  background: transparent;
+  border-radius: 20px;
+  box-shadow: none;
+  padding: 0;
+}
+
+.religious-map-popup .leaflet-popup-content {
+  margin: 0;
+}
+
+.religious-map-popup .leaflet-popup-tip {
+  background: #071a2f;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.temple-popup {
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.025)),
+    #071a2f;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.42);
+  color: #f8fafc;
+  overflow: hidden;
+  padding: 12px;
+  width: 272px;
+}
+
+.temple-popup__image {
+  background-position: center;
+  background-size: cover;
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  border-radius: 16px;
+  height: 128px;
+}
+
+.temple-popup__image--fallback {
+  align-items: center;
+  background:
+    radial-gradient(circle at 50% 35%, rgba(212, 175, 55, 0.22), transparent 42%),
+    linear-gradient(145deg, #0f2744, #030817);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  justify-content: center;
+}
+
+.temple-popup__image--fallback span {
+  color: #f5d76e;
+  font-size: 28px;
+  line-height: 1;
+}
+
+.temple-popup__image--fallback small {
+  color: #d4af37;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.temple-popup__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.temple-popup__badge,
+.temple-popup__meta {
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  border-radius: 999px;
+  background: rgba(212, 175, 55, 0.1);
+  color: #f5d76e;
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1;
+  padding: 6px 10px;
+}
+
+.temple-popup__meta {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: #cbd5e1;
+}
+
+.temple-popup__title {
+  color: #f8fafc;
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1.25;
+  margin: 12px 0 0;
+}
+
+.temple-popup__location {
+  color: #cbd5e1;
+  font-size: 14px;
+  line-height: 1.55;
+  margin: 8px 0 0;
+}
+
+.temple-popup__button {
+  align-items: center;
+  border-radius: 16px;
+  display: flex;
+  font-size: 14px;
+  font-weight: 900;
+  justify-content: center;
+  margin-top: 12px;
+  padding: 10px 16px;
+  text-decoration: none;
+  width: 100%;
+}
+
+.temple-popup__button--primary {
+  background: #d4af37;
+  color: #071a2f;
+}
+
+.temple-popup__button--secondary {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  color: #f5d76e;
+}

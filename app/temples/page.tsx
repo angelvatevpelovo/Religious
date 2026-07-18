@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { supabase } from "../../lib/supabase";
 import TemplesExplorerClient from "./TemplesExplorerClient";
+import { getTempleReligionSearchTerms } from "./templeDisplay";
 import type { TempleListTemple } from "./types";
 
 const PAGE_SIZE = 24;
@@ -41,7 +42,13 @@ async function fetchAllFilteredTemples(filters: TempleFilter) {
     if (filters.country) query = query.eq("country", filters.country);
     if (filters.city) query = query.ilike("city", `%${filters.city}%`);
     if (filters.religion) {
-      query = query.ilike("religion", `%${filters.religion}%`);
+      const religionTerms = getTempleReligionSearchTerms(filters.religion);
+
+      query = query.or(
+        religionTerms
+          .map((term) => `religion.ilike.%${term.replace(/[%(),]/g, "")}%`)
+          .join(",")
+      );
     }
 
     const { data, error } = await query;

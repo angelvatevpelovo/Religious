@@ -2,6 +2,7 @@ export type TempleMapTemple = {
   id: string;
   name: string | null;
   religion: string | null;
+  denomination: string | null;
   country: string | null;
   city: string | null;
   latitude: number | string | null;
@@ -10,7 +11,6 @@ export type TempleMapTemple = {
 };
 
 export type TempleListTemple = TempleMapTemple & {
-  denomination: string | null;
   address: string | null;
   description: string | null;
   website_url: string | null;

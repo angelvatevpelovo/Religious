@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import TempleMapWrapper from "./TempleMapWrapper";
+import { getTempleMarkerStyle, normalizeTempleReligionLabel } from "./templeDisplay";
 import type { TempleListTemple } from "./types";
 
 type UserLocation = {
@@ -71,6 +72,12 @@ function uniqueSortedValues(temples: TempleListTemple[], field: "religion" | "co
   ).sort((first, second) => first.localeCompare(second));
 }
 
+function uniqueSortedReligionLabels(temples: TempleListTemple[]) {
+  return Array.from(
+    new Set(temples.map((temple) => normalizeTempleReligionLabel(temple.religion)))
+  ).sort((first, second) => first.localeCompare(second));
+}
+
 function matchesTextSearch(temple: TempleListTemple, search: string) {
   const normalizedSearch = search.trim().toLowerCase();
 
@@ -79,6 +86,7 @@ function matchesTextSearch(temple: TempleListTemple, search: string) {
   const searchableText = [
     temple.name,
     temple.religion,
+    normalizeTempleReligionLabel(temple.religion),
     temple.denomination,
     temple.country,
     temple.city,
@@ -94,6 +102,7 @@ function matchesTextSearch(temple: TempleListTemple, search: string) {
 
 function TempleCard({ temple }: { temple: TempleWithDistance }) {
   const navigationUrl = googleMapsUrl(temple);
+  const markerStyle = getTempleMarkerStyle(temple.religion);
 
   return (
     <article className="group overflow-hidden rounded-[1.5rem] border border-white/12 bg-[#061326]/58 p-5 shadow-2xl shadow-black/24 backdrop-blur-2xl transition hover:-translate-y-1 hover:border-[#D4AF37]/50 hover:bg-[#08182D]/68">
@@ -108,7 +117,7 @@ function TempleCard({ temple }: { temple: TempleWithDistance }) {
 
         <div className="flex flex-wrap gap-2">
           <span className="rounded-full border border-[#D4AF37]/35 bg-[#D4AF37]/10 px-3 py-1 text-xs font-bold text-[#F5D76E]">
-            {temple.religion || "Sacred place"}
+            {markerStyle.symbol} {markerStyle.label}
           </span>
           {temple.denomination && (
             <span className="rounded-full border border-white/12 bg-white/[0.06] px-3 py-1 text-xs font-bold text-[#CBD5E1]">
@@ -189,7 +198,7 @@ export default function TemplesExplorerClient({
   const [locationMessage, setLocationMessage] = useState("");
 
   const religionOptions = useMemo(
-    () => uniqueSortedValues(temples, "religion"),
+    () => uniqueSortedReligionLabels(temples),
     [temples]
   );
 
@@ -242,7 +251,8 @@ export default function TemplesExplorerClient({
   const filteredTemples = useMemo(() => {
     return temples.filter((temple) => {
       const matchesReligion =
-        selectedReligion === "All" || temple.religion === selectedReligion;
+        selectedReligion === "All" ||
+        normalizeTempleReligionLabel(temple.religion) === selectedReligion;
       const matchesCountry =
         selectedCountry === "All" || temple.country === selectedCountry;
       const matchesCity = selectedCity === "All" || temple.city === selectedCity;
