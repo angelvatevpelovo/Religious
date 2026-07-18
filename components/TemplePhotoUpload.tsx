@@ -64,8 +64,8 @@ export default function TemplePhotoUpload({ templeId }: { templeId: string }) {
   }
 
   return (
-    <div className="rounded-3xl border border-white/20 bg-white/5 p-6">
-      <h2 className="mb-4 text-3xl font-bold text-[#D4AF37]">
+    <div className="rounded-[2rem] border border-white/12 bg-white/[0.045] p-6 shadow-2xl shadow-black/20 backdrop-blur-2xl">
+      <h2 className="mb-4 text-3xl font-black text-[#F8FAFC]">
         Upload Photo
       </h2>
 
@@ -74,10 +74,10 @@ export default function TemplePhotoUpload({ templeId }: { templeId: string }) {
         accept="image/*"
         onChange={uploadPhoto}
         disabled={uploading}
-        className="text-white"
+        className="w-full rounded-2xl border border-white/12 bg-[#030817]/72 p-3 text-[#CBD5E1] file:mr-4 file:rounded-xl file:border-0 file:bg-[#D4AF37] file:px-4 file:py-2 file:font-bold file:text-[#071A2F]"
       />
 
-      {uploading && <p className="mt-4 text-white/70">Uploading...</p>}
+      {uploading && <p className="mt-4 text-[#AFC0D4]">Uploading...</p>}
     </div>
   );
 }

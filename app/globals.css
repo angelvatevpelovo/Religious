@@ -354,6 +354,41 @@ body {
   opacity: 0.4;
 }
 
+.temple-detail-shell {
+  background:
+    radial-gradient(ellipse at 82% 8%, rgba(212, 175, 55, 0.1), transparent 30rem),
+    radial-gradient(ellipse at 14% 30%, rgba(91, 141, 239, 0.1), transparent 34rem),
+    radial-gradient(ellipse at 72% 72%, rgba(92, 73, 168, 0.1), transparent 42rem),
+    linear-gradient(180deg, #030817 0%, #071426 46%, #050a15 100%) !important;
+}
+
+.temple-detail-atmosphere {
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.14) 0 0.65px, transparent 1px),
+    radial-gradient(circle, rgba(245, 215, 110, 0.09) 0 0.7px, transparent 1.15px),
+    linear-gradient(rgba(255, 255, 255, 0.024) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.024) 1px, transparent 1px);
+  background-position:
+    0 0,
+    52px 46px,
+    0 0,
+    0 0;
+  background-size:
+    132px 132px,
+    214px 214px,
+    96px 96px,
+    96px 96px;
+  mask-image: radial-gradient(ellipse at 50% 18%, black 0%, black 45%, transparent 86%);
+  opacity: 0.4;
+}
+
+.temple-image-placeholder {
+  background:
+    radial-gradient(ellipse at 50% 45%, rgba(212, 175, 55, 0.18), transparent 18rem),
+    radial-gradient(ellipse at 72% 26%, rgba(91, 141, 239, 0.14), transparent 22rem),
+    linear-gradient(135deg, #061326 0%, #0f2744 52%, #030817 100%);
+}
+
 @keyframes sacredFieldDrift {
   0%,
   100% {

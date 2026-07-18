@@ -48,38 +48,41 @@ export default function ReviewForm({ templeId }: { templeId: string }) {
   }
 
   return (
-    <section className="mt-10 rounded-3xl border border-white/20 bg-white/10 p-6">
-      <h2 className="text-3xl font-bold text-[#D4AF37]">Add Review</h2>
+    <section className="mt-10 rounded-[2rem] border border-white/12 bg-white/[0.045] p-6 shadow-2xl shadow-black/20 backdrop-blur-2xl">
+      <h2 className="text-3xl font-black text-[#F8FAFC]">Add Review</h2>
 
-      <label className="mt-5 block text-white/70">Rating</label>
+      <label className="mt-5 block text-sm font-bold uppercase tracking-[0.16em] text-[#F5D76E]">
+        Rating
+      </label>
       <select
         value={rating}
         onChange={(e) => setRating(Number(e.target.value))}
-        className="mt-2 rounded-xl border border-white/20 bg-[#0F2744] p-3 text-white"
+        className="mt-2 rounded-2xl border border-white/12 bg-[#030817]/72 p-3 text-[#F8FAFC] outline-none transition focus:border-[#D4AF37]/70"
       >
-        <option value={5}>★★★★★ 5</option>
-        <option value={4}>★★★★☆ 4</option>
-        <option value={3}>★★★☆☆ 3</option>
-        <option value={2}>★★☆☆☆ 2</option>
-        <option value={1}>★☆☆☆☆ 1</option>
+        <option value={5}>{"\u2605\u2605\u2605\u2605\u2605"} 5</option>
+        <option value={4}>{"\u2605\u2605\u2605\u2605\u2606"} 4</option>
+        <option value={3}>{"\u2605\u2605\u2605\u2606\u2606"} 3</option>
+        <option value={2}>{"\u2605\u2605\u2606\u2606\u2606"} 2</option>
+        <option value={1}>{"\u2605\u2606\u2606\u2606\u2606"} 1</option>
       </select>
 
       <textarea
         value={comment}
         onChange={(e) => setComment(e.target.value)}
         placeholder="Write your review..."
-        className="mt-5 min-h-32 w-full rounded-2xl border border-white/20 bg-white/10 p-4 text-white outline-none placeholder:text-white/50"
+        className="mt-5 min-h-32 w-full rounded-2xl border border-white/12 bg-[#030817]/72 p-4 text-[#F8FAFC] outline-none transition placeholder:text-[#7890AA] focus:border-[#D4AF37]/70"
       />
 
       <button
+        type="button"
         onClick={submitReview}
         disabled={saving}
-        className="mt-5 rounded-2xl bg-[#D4AF37] px-6 py-3 font-bold text-[#0F2744] disabled:opacity-50"
+        className="mt-5 rounded-2xl bg-[#D4AF37] px-6 py-3 font-black text-[#071A2F] transition hover:bg-[#F5D76E] disabled:opacity-50"
       >
         {saving ? "Saving..." : "Submit Review"}
       </button>
 
-      {message && <p className="mt-4 text-white/70">{message}</p>}
+      {message && <p className="mt-4 text-[#AFC0D4]">{message}</p>}
     </section>
   );
 }
