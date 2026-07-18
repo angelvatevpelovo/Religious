@@ -298,6 +298,34 @@ body {
   scroll-margin-top: 6rem;
 }
 
+.search-shell {
+  background:
+    radial-gradient(ellipse at 82% 10%, rgba(212, 175, 55, 0.1), transparent 30rem),
+    radial-gradient(ellipse at 14% 32%, rgba(91, 141, 239, 0.1), transparent 34rem),
+    radial-gradient(ellipse at 66% 74%, rgba(92, 73, 168, 0.1), transparent 40rem),
+    linear-gradient(180deg, #030817 0%, #071426 46%, #050a15 100%) !important;
+}
+
+.search-atmosphere {
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.14) 0 0.65px, transparent 1px),
+    radial-gradient(circle, rgba(245, 215, 110, 0.09) 0 0.7px, transparent 1.15px),
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-position:
+    0 0,
+    48px 42px,
+    0 0,
+    0 0;
+  background-size:
+    126px 126px,
+    204px 204px,
+    92px 92px,
+    92px 92px;
+  mask-image: radial-gradient(ellipse at 50% 18%, black 0%, black 44%, transparent 84%);
+  opacity: 0.4;
+}
+
 @keyframes sacredFieldDrift {
   0%,
   100% {
