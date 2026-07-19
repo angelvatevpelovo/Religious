@@ -15,7 +15,51 @@ type TempleWithDistance = TempleListTemple & {
   distanceKm: number | null;
 };
 
+type QualityFilterKey = "image" | "website" | "type" | "city" | "description";
+
+type QualityFilters = Record<QualityFilterKey, boolean>;
+
 const radiusOptions = [5, 10, 25, 50];
+
+const qualityFilterOptions: Array<{
+  key: QualityFilterKey;
+  label: string;
+  matches: (temple: TempleListTemple) => boolean;
+}> = [
+  {
+    key: "image",
+    label: "With images",
+    matches: (temple) => isNonEmptyString(temple.image_url),
+  },
+  {
+    key: "website",
+    label: "With website",
+    matches: (temple) => isNonEmptyString(temple.website_url),
+  },
+  {
+    key: "type",
+    label: "With type",
+    matches: (temple) => isNonEmptyString(temple.denomination),
+  },
+  {
+    key: "city",
+    label: "With city",
+    matches: (temple) => isNonEmptyString(temple.city),
+  },
+  {
+    key: "description",
+    label: "With description",
+    matches: (temple) => isNonEmptyString(temple.description),
+  },
+];
+
+const emptyQualityFilters: QualityFilters = {
+  image: false,
+  website: false,
+  type: false,
+  city: false,
+  description: false,
+};
 
 function coordinate(value: number | string | null) {
   const parsed = Number(value);
@@ -196,6 +240,8 @@ export default function TemplesExplorerClient({
   const [nearMeEnabled, setNearMeEnabled] = useState(false);
   const [locating, setLocating] = useState(false);
   const [locationMessage, setLocationMessage] = useState("");
+  const [qualityFilters, setQualityFilters] =
+    useState<QualityFilters>(emptyQualityFilters);
 
   const religionOptions = useMemo(
     () => uniqueSortedReligionLabels(temples),
@@ -256,15 +302,19 @@ export default function TemplesExplorerClient({
       const matchesCountry =
         selectedCountry === "All" || temple.country === selectedCountry;
       const matchesCity = selectedCity === "All" || temple.city === selectedCity;
+      const matchesQuality = qualityFilterOptions.every((option) => {
+        return !qualityFilters[option.key] || option.matches(temple);
+      });
 
       return (
         matchesReligion &&
         matchesCountry &&
         matchesCity &&
+        matchesQuality &&
         matchesTextSearch(temple, search)
       );
     });
-  }, [search, selectedCity, selectedCountry, selectedReligion, temples]);
+  }, [qualityFilters, search, selectedCity, selectedCountry, selectedReligion, temples]);
 
   const templesWithDistance = useMemo<TempleWithDistance[]>(() => {
     return filteredTemples.map((temple) => ({
@@ -302,6 +352,7 @@ export default function TemplesExplorerClient({
     selectedReligion !== "All" ||
     selectedCountry !== "All" ||
     selectedCity !== "All" ||
+    qualityFilterOptions.some((option) => qualityFilters[option.key]) ||
     nearMeEnabled;
 
   function updateFilter(update: () => void) {
@@ -319,10 +370,19 @@ export default function TemplesExplorerClient({
     setSelectedReligion("All");
     setSelectedCountry("All");
     setSelectedCity("All");
+    setQualityFilters(emptyQualityFilters);
     setNearMeEnabled(false);
     setRadiusKm(25);
     setPage(1);
     setLocationMessage("");
+  }
+
+  function toggleQualityFilter(key: QualityFilterKey) {
+    setQualityFilters((current) => ({
+      ...current,
+      [key]: !current[key],
+    }));
+    setPage(1);
   }
 
   return (
@@ -424,6 +484,41 @@ export default function TemplesExplorerClient({
           >
             Reset filters
           </button>
+        </div>
+
+        <div className="mt-5 rounded-[1.25rem] border border-white/10 bg-[#030817]/42 p-4">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#F5D76E]">
+                Quality
+              </p>
+              <p className="mt-1 text-sm text-[#AFC0D4]">
+                Quality filters are applied to the visible loaded places.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {qualityFilterOptions.map((option) => {
+                const active = qualityFilters[option.key];
+
+                return (
+                  <button
+                    key={option.key}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => toggleQualityFilter(option.key)}
+                    className={`min-h-10 rounded-full border px-4 py-2 text-sm font-bold transition ${
+                      active
+                        ? "border-[#D4AF37] bg-[#D4AF37] text-[#071A2F] shadow-lg shadow-[#D4AF37]/15"
+                        : "border-white/15 bg-white/[0.035] text-[#F5D76E] hover:border-[#D4AF37]/45 hover:bg-white/[0.07]"
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
 
