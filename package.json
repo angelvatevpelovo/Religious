@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "audit:temple-data": "node --use-system-ca scripts/audit-temple-data-quality.js",
     "import:world": "node --use-system-ca scripts/import-osm-temples.js",
     "import:egyptian-book-of-dead": "node --use-system-ca scripts/import-egyptian-book-of-dead-selections.js",
     "import:book-of-mormon": "node --use-system-ca scripts/import-book-of-mormon.js",
