@@ -1280,6 +1280,24 @@ body {
   color: #e2e8f0;
 }
 
+.temple-legend-marker {
+  align-items: center;
+  background:
+    radial-gradient(circle at 35% 24%, rgba(255, 255, 255, 0.2), transparent 30%),
+    linear-gradient(145deg, rgba(7, 26, 47, 0.96), rgba(3, 8, 23, 0.94));
+  border: 1px solid rgba(245, 215, 110, 0.72);
+  border-radius: 999px;
+  box-shadow: 0 0 14px rgba(212, 175, 55, 0.14);
+  color: #f5d76e;
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 900;
+  height: 1.65rem;
+  justify-content: center;
+  line-height: 1;
+  width: 1.65rem;
+}
+
 .religious-map-popup .leaflet-popup-content-wrapper {
   background: transparent;
   border-radius: 20px;

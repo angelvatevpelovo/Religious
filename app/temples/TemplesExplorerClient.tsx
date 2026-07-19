@@ -384,6 +384,33 @@ export default function TemplesExplorerClient({
     [visibleTemples]
   );
 
+  const legendItems = useMemo(() => {
+    const itemMap = new Map<
+      string,
+      { label: string; symbol: string; className: string; count: number }
+    >();
+
+    for (const temple of mapTemples) {
+      const style = getTempleMarkerStyle(temple.religion);
+      const current = itemMap.get(style.label);
+
+      if (current) {
+        current.count += 1;
+      } else {
+        itemMap.set(style.label, {
+          label: style.label,
+          symbol: style.symbol,
+          className: style.className,
+          count: 1,
+        });
+      }
+    }
+
+    return Array.from(itemMap.values()).sort((first, second) =>
+      first.label.localeCompare(second.label)
+    );
+  }, [mapTemples]);
+
   const totalPages = Math.max(1, Math.ceil(visibleTemples.length / pageSize));
   const currentPage = Math.min(Math.max(page, 1), totalPages);
   const start = (currentPage - 1) * pageSize;
@@ -658,7 +685,47 @@ export default function TemplesExplorerClient({
         </div>
       </div>
 
-      <div className="mt-8">
+      <div className="mt-8 rounded-[1.5rem] border border-white/12 bg-white/[0.045] p-5 shadow-2xl shadow-black/20 backdrop-blur-2xl">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#F5D76E]">
+              Map legend
+            </p>
+            <p className="mt-2 text-sm leading-6 text-[#AFC0D4]">
+              Map shows all filtered places with coordinates. It updates with
+              your active filters.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            {legendItems.length === 0 ? (
+              <span className="rounded-full border border-white/12 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-[#CBD5E1]">
+                No mapped places
+              </span>
+            ) : (
+              legendItems.map((item) => (
+                <span
+                  key={item.label}
+                  className="inline-flex min-h-10 items-center gap-2 rounded-full border border-white/12 bg-[#030817]/60 px-3 py-2 text-sm font-bold text-[#E2E8F0]"
+                >
+                  <span
+                    className={`temple-legend-marker ${item.className}`}
+                    aria-hidden="true"
+                  >
+                    {item.symbol}
+                  </span>
+                  <span>{item.label}</span>
+                  <span className="text-xs font-semibold text-[#AFC0D4]">
+                    {item.count}
+                  </span>
+                </span>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-4">
         <TempleMapWrapper temples={mapTemples} />
       </div>
 
