@@ -19,6 +19,8 @@ type QualityFilterKey = "image" | "website" | "type" | "city" | "description";
 
 type QualityFilters = Record<QualityFilterKey, boolean>;
 
+type SortMode = "quality" | "name" | "nearest";
+
 const radiusOptions = [5, 10, 25, 50];
 
 const qualityFilterOptions: Array<{
@@ -69,6 +71,27 @@ function coordinate(value: number | string | null) {
 
 function hasCoordinates(temple: TempleListTemple) {
   return coordinate(temple.latitude) !== null && coordinate(temple.longitude) !== null;
+}
+
+function templeQualityScore(temple: TempleListTemple) {
+  let score = 0;
+
+  if (isNonEmptyString(temple.image_url)) score += 3;
+  if (isNonEmptyString(temple.description)) score += 2;
+  if (isNonEmptyString(temple.website_url)) score += 2;
+  if (isNonEmptyString(temple.denomination)) score += 1;
+  if (isNonEmptyString(temple.city)) score += 1;
+  if (isNonEmptyString(temple.address)) score += 1;
+  if (isNonEmptyString(temple.religion)) score += 1;
+  if (hasCoordinates(temple)) score += 1;
+
+  return score;
+}
+
+function compareTempleNames(first: TempleListTemple, second: TempleListTemple) {
+  return (first.name || "Unnamed temple").localeCompare(
+    second.name || "Unnamed temple"
+  );
 }
 
 function distanceKm(userLocation: UserLocation, temple: TempleListTemple) {
@@ -242,6 +265,7 @@ export default function TemplesExplorerClient({
   const [locationMessage, setLocationMessage] = useState("");
   const [qualityFilters, setQualityFilters] =
     useState<QualityFilters>(emptyQualityFilters);
+  const [sortMode, setSortMode] = useState<SortMode>("quality");
 
   const religionOptions = useMemo(
     () => uniqueSortedReligionLabels(temples),
@@ -279,6 +303,7 @@ export default function TemplesExplorerClient({
           longitude: position.coords.longitude,
         });
         setNearMeEnabled(true);
+        setSortMode("nearest");
         setPage(1);
         setLocating(false);
       },
@@ -330,13 +355,29 @@ export default function TemplesExplorerClient({
       return temple.distanceKm !== null && temple.distanceKm <= radiusKm;
     });
 
-    if (!nearMeEnabled || !userLocation) return result;
-
     return [...result].sort((first, second) => {
-      return (first.distanceKm ?? Number.POSITIVE_INFINITY) -
-        (second.distanceKm ?? Number.POSITIVE_INFINITY);
+      if (sortMode === "nearest") {
+        const firstDistance = first.distanceKm ?? Number.POSITIVE_INFINITY;
+        const secondDistance = second.distanceKm ?? Number.POSITIVE_INFINITY;
+        const distanceComparison = firstDistance - secondDistance;
+
+        if (distanceComparison !== 0) return distanceComparison;
+
+        return compareTempleNames(first, second);
+      }
+
+      if (sortMode === "name") {
+        return compareTempleNames(first, second);
+      }
+
+      const qualityComparison =
+        templeQualityScore(second) - templeQualityScore(first);
+
+      if (qualityComparison !== 0) return qualityComparison;
+
+      return compareTempleNames(first, second);
     });
-  }, [nearMeEnabled, radiusKm, templesWithDistance, userLocation]);
+  }, [nearMeEnabled, radiusKm, sortMode, templesWithDistance, userLocation]);
 
   const mapTemples = useMemo(
     () => visibleTemples.filter((temple) => hasCoordinates(temple)),
@@ -352,6 +393,7 @@ export default function TemplesExplorerClient({
     selectedReligion !== "All" ||
     selectedCountry !== "All" ||
     selectedCity !== "All" ||
+    sortMode !== "quality" ||
     qualityFilterOptions.some((option) => qualityFilters[option.key]) ||
     nearMeEnabled;
 
@@ -371,6 +413,7 @@ export default function TemplesExplorerClient({
     setSelectedCountry("All");
     setSelectedCity("All");
     setQualityFilters(emptyQualityFilters);
+    setSortMode("quality");
     setNearMeEnabled(false);
     setRadiusKm(25);
     setPage(1);
@@ -397,6 +440,27 @@ export default function TemplesExplorerClient({
           </div>
 
           <div className="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:justify-end">
+            <label
+              className="col-span-2 grid gap-2 text-xs font-bold uppercase tracking-[0.16em] text-[#F5D76E] sm:col-span-1"
+              htmlFor="temple-sort-mode"
+            >
+              Sort
+              <select
+                id="temple-sort-mode"
+                value={sortMode}
+                onChange={(event) => {
+                  setSortMode(event.target.value as SortMode);
+                  setPage(1);
+                }}
+                className="min-h-12 rounded-2xl border border-white/12 bg-[#030817]/72 px-4 py-3 text-sm normal-case tracking-normal text-[#F8FAFC] outline-none transition focus:border-[#D4AF37]/70"
+              >
+                <option value="quality">Best quality</option>
+                <option value="name">Name A-Z</option>
+                <option value="nearest" disabled={!userLocation}>
+                  Nearest first
+                </option>
+              </select>
+            </label>
             <div className="rounded-2xl border border-white/10 bg-[#030817]/62 px-4 py-3">
               <p className="text-xs font-bold uppercase text-[#7890AA]">Total loaded</p>
               <p className="mt-1 text-2xl font-bold text-[#D4AF37]">{temples.length}</p>
@@ -548,6 +612,7 @@ export default function TemplesExplorerClient({
                 type="button"
                 onClick={() => {
                   setNearMeEnabled(false);
+                  if (sortMode === "nearest") setSortMode("quality");
                   setPage(1);
                 }}
                 className="rounded-2xl border border-white/20 px-5 py-3 font-bold text-[#F5D76E] transition hover:bg-white/10"
